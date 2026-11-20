@@ -1,0 +1,87 @@
+name: Build Android APK
+
+# Runs by itself after every upload to the main branch,
+# or by hand: Actions tab -> "Build Android APK" -> Run workflow.
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+# A newer upload replaces a build that is still running.
+concurrency:
+  group: build-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write   # needed to publish the APK on the Releases page
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Install the tools listed in package.json
+        run: npm ci
+
+      - name: Create the Android project (icons, launch screen, web app)
+        run: node scripts/prepare-android.js
+        env:
+          IRONBODY_BUILD_NUMBER: ${{ github.run_number }}
+
+      # Same signing key every time = a new APK installs over the old one
+      # without uninstalling (your saved data stays).
+      - name: Use the fixed debug signing key
+        run: |
+          mkdir -p "$HOME/.android"
+          if keytool -list -keystore keystore/debug.keystore -storepass android > /dev/null 2>&1; then
+            cp keystore/debug.keystore "$HOME/.android/debug.keystore"
+            echo "Using keystore/debug.keystore"
+          else
+            echo "::warning::Could not read keystore/debug.keystore - Gradle will make a fresh key (updating then needs an uninstall first)."
+          fi
+
+      - name: Build the APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Name the file
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk IronBody.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: IronBody-apk
+          path: IronBody.apk
+          if-no-files-found: error
+
+      # Puts IronBody.apk on the Releases page, so it can be downloaded straight to a phone.
+      # The link  https://github.com/<you>/<repo>/releases/latest/download/IronBody.apk
+      # always points to the newest build.
+      - name: Publish on the Releases page
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          name: IronBody build ${{ github.run_number }}
+          body: |
+            Download **IronBody.apk** below and open it on your Android phone.
+            (First time only: Android asks to allow installs from this source - say yes.)
+          files: IronBody.apk
+          make_latest: true

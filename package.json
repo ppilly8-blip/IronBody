@@ -1,0 +1,21 @@
+{
+  "name": "ironbody-workout",
+  "version": "1.0.0",
+  "private": true,
+  "description": "IronBody - free no-equipment workout app (Capacitor wrapper for Android)",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "android:prepare": "node scripts/prepare-android.js",
+    "android:open": "node scripts/prepare-android.js && cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.2"
+  }
+}
