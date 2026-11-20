@@ -50,18 +50,8 @@ jobs:
         env:
           IRONBODY_BUILD_NUMBER: ${{ github.run_number }}
 
-      # Same signing key every time = a new APK installs over the old one
-      # without uninstalling (your saved data stays).
-      - name: Use the fixed debug signing key
-        run: |
-          mkdir -p "$HOME/.android"
-          if keytool -list -keystore keystore/debug.keystore -storepass android > /dev/null 2>&1; then
-            cp keystore/debug.keystore "$HOME/.android/debug.keystore"
-            echo "Using keystore/debug.keystore"
-          else
-            echo "::warning::Could not read keystore/debug.keystore - Gradle will make a fresh key (updating then needs an uninstall first)."
-          fi
-
+      # The APK is signed with the fixed key in keystore/ (set up by scripts/prepare-android.js).
+      # Same key every time = a new APK installs over the old one and your saved data stays.
       - name: Build the APK
         working-directory: android
         run: |
@@ -70,6 +60,16 @@ jobs:
 
       - name: Name the file
         run: cp android/app/build/outputs/apk/debug/app-debug.apk IronBody.apk
+
+      # Safety net: stop here if the APK is not signed with the fixed key.
+      - name: Check the APK is signed with the fixed key
+        run: |
+          APKSIGNER=$(ls "${ANDROID_HOME:-/usr/local/lib/android/sdk}"/build-tools/*/apksigner | sort -V | tail -1)
+          WANT=$(keytool -list -v -keystore keystore/debug.keystore -storepass android 2>/dev/null | grep 'SHA256:' | head -1 | sed 's/.*SHA256: *//; s/://g' | tr 'A-F' 'a-f')
+          GOT=$("$APKSIGNER" verify --print-certs IronBody.apk | grep 'certificate SHA-256 digest' | head -1 | sed 's/.*: *//' | tr 'A-F' 'a-f')
+          echo "fixed key : $WANT"
+          echo "apk signed: $GOT"
+          test -n "$WANT" && test "$WANT" = "$GOT"
 
       - uses: actions/upload-artifact@v4
         with:

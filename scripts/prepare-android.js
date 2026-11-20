@@ -120,6 +120,35 @@ if (build > 0) {
   log('version set to 1.0.' + build + ' (code ' + build + ')');
 }
 
+// 3d. sign with the fixed key in keystore/. Without this, every build machine invents its own
+//     random debug key, and Android refuses to install a newer APK over an older one.
+{
+  const gradleFile = path.join(androidDir, 'app', 'build.gradle');
+  const gradle = fs.readFileSync(gradleFile, 'utf8');
+  if (!gradle.includes('ironbodyDebug')) {
+    if (!fs.existsSync(path.join(root, 'keystore', 'debug.keystore'))) fail('keystore/debug.keystore is missing.');
+    const buildTypes = /^([ \t]*)buildTypes\s*\{/m;
+    const found = buildTypes.exec(gradle);
+    if (!found) fail('buildTypes block not found in app/build.gradle - the Capacitor template looks different than expected.');
+    const i = found[1];
+    const block =
+      i + 'signingConfigs {\n' +
+      i + '    ironbodyDebug {\n' +
+      i + '        storeFile file("../../keystore/debug.keystore")\n' +
+      i + '        storePassword "android"\n' +
+      i + '        keyAlias "androiddebugkey"\n' +
+      i + '        keyPassword "android"\n' +
+      i + '    }\n' +
+      i + '}\n' +
+      i + 'buildTypes {\n' +
+      i + '    debug {\n' +
+      i + '        signingConfig signingConfigs.ironbodyDebug\n' +
+      i + '    }';
+    fs.writeFileSync(gradleFile, gradle.replace(buildTypes, () => block));
+    log('debug builds are signed with keystore/debug.keystore');
+  }
+}
+
 // ---- 4. copy the web app into the Android app ----------------------------------------------
 log('copying www/ into the Android app ...');
 cap('sync', 'android');
