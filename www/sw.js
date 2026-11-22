@@ -1,5 +1,5 @@
 // IronBody offline cache. Everything the app needs is stored on first visit; photos from Wikipedia still need internet.
-const CACHE = 'ironbody-db5090bbe4';
+const CACHE = 'ironbody-f26e8019b3';
 const ASSETS = [
   "./",
   "index.html",

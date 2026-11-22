@@ -204,6 +204,30 @@
   .ach-badge .ach-icon { font-size:28px; margin-bottom:6px; }
   .ach-badge .ach-name { font-size:10px; color:var(--muted); line-height:1.3; }
   .ach-badge.earned .ach-name { color:var(--accent); }
+  .progress-note { background:rgba(71,217,255,.06); border:1px solid rgba(71,217,255,.2); border-radius:12px; padding:12px 16px; font-size:13px; line-height:1.6; color:var(--accent3); margin-bottom:16px; }
+  .p-tiles { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .p-tile { background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:12px 12px 10px; min-width:0; }
+  .p-tile .p-num { font-family:var(--font-display); font-size:34px; line-height:1; color:var(--accent); }
+  .p-tile .p-lbl { font-size:11px; color:var(--muted); margin-top:4px; }
+  @media (min-width:520px) { .p-tiles { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+  .day-dot.today { border-color:var(--accent3); }
+  .day-dot.future { opacity:.4; }
+  .day-dot.done .d-icon { color:var(--accent); }
+  .m-empty, .recent-empty { font-size:13px; line-height:1.6; color:var(--muted); }
+  .m-foot { font-size:11px; line-height:1.5; color:var(--muted); margin-top:12px; font-family:var(--font-mono); }
+  .recent-list { display:flex; flex-direction:column; gap:8px; }
+  .recent-row { display:flex; align-items:center; gap:12px; background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:10px 12px; min-width:0; }
+  .recent-row .r-main { flex:1; min-width:0; }
+  .recent-row .r-name { font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .recent-row .r-when { font-size:11px; color:var(--muted); font-family:var(--font-mono); margin-top:2px; }
+  .recent-row .r-stat { font-size:12px; color:var(--accent); font-family:var(--font-mono); text-align:right; white-space:nowrap; }
+  .recent-row .r-stat small { display:block; font-size:10px; color:var(--muted); margin-top:2px; }
+  .ach-badge .ach-desc { font-size:9px; color:var(--muted); line-height:1.3; margin-top:3px; }
+  .ach-badge .ach-prog { font-size:10px; color:var(--muted); font-family:var(--font-mono); margin-top:6px; }
+  .ach-badge.earned .ach-prog { color:var(--accent); }
+  .reset-row { text-align:center; padding:2px 0 12px; }
+  .reset-btn { background:none; border:none; color:var(--muted); font-family:var(--font-body); font-size:12px; text-decoration:underline; cursor:pointer; padding:10px 14px; }
+  .reset-btn.armed { color:var(--accent2); }
 
   /* EXERCISE DETAIL MODAL */
   .ex-modal-body { padding:0 20px 20px; }
@@ -318,6 +342,17 @@
   .aw-pause-btn:hover { border-color:var(--accent); color:var(--accent); }
   .aw-pause-btn.paused { background:rgba(232,255,71,.1); border-color:rgba(232,255,71,.4); color:var(--accent); }
 
+  /* start-up safety: after a new exercise appears the footer buttons ignore taps for a moment and look dimmed,
+     so a second tap on START WORKOUT can't land on COMPLETE SET */
+  .aw-next-btn, .hold-start { transition:transform .15s, opacity .25s; }
+  .aw-skip-btn { transition:border-color .2s, opacity .25s; }
+  .aw-pause-btn { transition:border-color .2s, background .2s, opacity .25s; }
+  .aw-footer.locked .aw-next-btn, .aw-footer.locked .hold-start, .aw-footer.locked .aw-skip-btn, .aw-footer.locked .aw-pause-btn { opacity:.45; }
+  .aw-next-btn.confirm { background:rgba(251,191,36,.12); border:1px solid #fbbf24; color:#fbbf24; font-size:14px; }
+  /* AUTO / MANUAL switch on the timer card */
+  .hold-auto { position:absolute; top:10px; left:10px; height:28px; padding:0 10px; border-radius:14px; background:none; border:1px solid var(--border); color:var(--muted); font-family:var(--font-mono); font-size:10px; font-weight:700; letter-spacing:.6px; line-height:1; cursor:pointer; }
+  .hold-auto.on { border-color:rgba(232,255,71,.5); color:var(--accent); background:rgba(232,255,71,.08); }
+
   /* PAUSE OVERLAY */
   .pause-overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); backdrop-filter:blur(16px); z-index:360; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s; }
   .pause-overlay.open { opacity:1; pointer-events:all; }
@@ -360,6 +395,13 @@
   .complete-stat .c-val { font-family:var(--font-display); font-size:36px; color:var(--accent); }
   .complete-stat .c-lbl { font-size:11px; color:var(--muted); margin-top:4px; }
   .complete-btn { width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:14px; font-family:var(--font-display); font-size:22px; letter-spacing:1px; cursor:pointer; }
+
+  .complete-saved { font-family:var(--font-mono); font-size:12px; line-height:1.5; color:var(--accent); text-align:center; max-width:320px; }
+  .complete-saved.none { color:var(--muted); }
+
+  /* TOAST: short message at the top of the screen (above the rest and finish screens) */
+  .toast { position:fixed; left:50%; top:max(14px, env(safe-area-inset-top)); transform:translate(-50%,-16px); z-index:600; max-width:min(92vw, 420px); padding:11px 18px; background:var(--bg2); color:var(--text); border:1px solid rgba(232,255,71,.45); border-radius:12px; font-family:var(--font-mono); font-size:12px; line-height:1.4; text-align:center; box-shadow:0 8px 28px rgba(0,0,0,.45); opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; }
+  .toast.show { opacity:1; transform:translate(-50%,0); }
 
   /* ═══════════ RESPONSIVE ═══════════
      Phones keep the layout above. Wider windows adapt automatically:
@@ -429,7 +471,7 @@
     /* progress: cards side by side */
     .progress-page { display:grid; grid-template-columns:1fr 1fr; column-gap:20px; align-items:start; }
     .progress-page > h1, .progress-page > .sub { grid-column:1 / -1; }
-    .progress-card:last-child { grid-column:1 / -1; }
+    .progress-card.wide, .progress-page > .progress-note, .progress-page > .reset-row { grid-column:1 / -1; }
     .achievements { grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); }
   }
 
@@ -648,7 +690,12 @@
   <div class="page" id="page-progress">
     <div class="progress-page">
       <h1>YOUR<br>PROGRESS</h1>
-      <div class="sub">Track your fitness journey</div>
+      <div class="sub">Fills in as you finish sets. Only what you really do is counted.</div>
+      <div class="progress-note" id="progress-note" style="display:none"></div>
+      <div class="progress-card wide">
+        <h3>TOTALS</h3>
+        <div class="p-tiles" id="p-tiles"></div>
+      </div>
       <div class="progress-card">
         <h3>THIS WEEK</h3>
         <div class="week-grid" id="week-grid"></div>
@@ -658,9 +705,14 @@
         <div class="muscles-chart" id="muscles-chart"></div>
       </div>
       <div class="progress-card">
+        <h3>RECENT WORKOUTS</h3>
+        <div class="recent-list" id="recent-list"></div>
+      </div>
+      <div class="progress-card">
         <h3>ACHIEVEMENTS</h3>
         <div class="achievements" id="achievements-grid"></div>
       </div>
+      <div class="reset-row"><button class="reset-btn" id="reset-btn" onclick="progressResetTap()">Reset progress</button></div>
     </div>
   </div>
 
@@ -730,6 +782,7 @@
     <div class="aw-ex-target" id="aw-ex-target">3 SETS × 15 REPS</div>
     <div class="aw-counter" id="aw-counter">
       <button class="hold-sound" id="hold-sound-btn" onclick="toggleCues()" style="display:none" aria-label="Beeps and vibration on">🔊</button>
+      <button class="hold-auto" id="hold-auto-btn" onclick="toggleAuto()" style="display:none" aria-pressed="true">AUTO</button>
       <div class="aw-count-num" id="aw-count">15</div>
       <div class="aw-count-lbl" id="aw-count-lbl">REPS</div>
       <div class="hold-panel" id="hold-panel" style="display:none">
@@ -741,11 +794,11 @@
     <div class="aw-tip" id="aw-tip">Keep your core tight and body in a straight line</div>
   </div>
   <div class="aw-footer">
-    <button class="hold-start" id="hold-start-btn" onclick="holdStart()" style="display:none">▶ START TIMER</button>
-    <button class="aw-next-btn" id="aw-next-btn" onclick="nextSet()">COMPLETE SET</button>
+    <button class="hold-start" id="hold-start-btn" onclick="holdStartTap()" style="display:none">▶ START TIMER</button>
+    <button class="aw-next-btn" id="aw-next-btn" onclick="nextSetTap()">COMPLETE SET</button>
     <div style="display:flex;gap:10px">
-      <button class="aw-skip-btn" style="flex:1" onclick="skipExercise()">Skip exercise</button>
-      <button class="aw-pause-btn" id="aw-pause-btn" onclick="togglePause()">
+      <button class="aw-skip-btn" style="flex:1" onclick="skipExerciseTap()">Skip exercise</button>
+      <button class="aw-pause-btn" id="aw-pause-btn" onclick="pauseTap()">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
         Pause
       </button>
@@ -772,19 +825,23 @@
   <h2>REST TIME</h2>
   <div class="rest-countdown" id="rest-countdown">30</div>
   <p>Next: <span id="rest-next-ex">Squats</span></p>
-  <button class="rest-skip" onclick="skipRest()">Skip Rest →</button>
+  <button class="rest-skip" onclick="skipRestTap()">Skip Rest →</button>
 </div>
+
+<!-- TOAST (outside the screens, so it is never clipped) -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- COMPLETE SCREEN -->
 <div class="complete-screen" id="complete-screen">
   <div class="confetti">🎉</div>
-  <h1>WORKOUT <br>COMPLETE!</h1>
-  <p>Amazing work! You crushed it. Your body is getting stronger every session.</p>
+  <h1 id="c-title">WORKOUT <br>COMPLETE!</h1>
+  <p id="c-msg">Amazing work! You crushed it. Your body is getting stronger every session.</p>
   <div class="complete-stats">
     <div class="complete-stat"><div class="c-val" id="c-time">0:00</div><div class="c-lbl">TIME</div></div>
     <div class="complete-stat"><div class="c-val" id="c-sets">0</div><div class="c-lbl">SETS</div></div>
     <div class="complete-stat"><div class="c-val" id="c-cal">0</div><div class="c-lbl">KCAL</div></div>
   </div>
+  <div class="complete-saved" id="c-saved"></div>
   <button class="complete-btn" onclick="finishWorkout()">BACK TO HOME</button>
 </div>
 
@@ -1321,31 +1378,198 @@ function renderExercises(muscle, search) {
     </div>`).join('');
 }
 
+// ─── PROGRESS (only what you really did) ─────────────────────────────
+// Every finished set is saved on this device the moment you complete it (localStorage, key ironbody-progress-v1).
+// Opening a routine or pressing START counts for nothing, and "Skip exercise" counts nothing.
+//   sets: one entry per finished set   { t: time, ex: exercise, m: muscle, rt: routine, sid: workout }
+//   sess: one entry per workout that has at least one finished set   { id, rt, nm, cat, t0, secs, sets, fin }
+const PROGRESS_KEY = 'ironbody-progress-v1';
+const MUSCLE_COLORS = { chest:'#e8ff47', core:'#47d9ff', legs:'#ff4f5e', back:'#a855f7', glutes:'#f59e0b', shoulders:'#10b981', arms:'#f472b6' };
+let progressMem = null;    // copy kept in memory, used if the browser blocks storage
+
+function escHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
+
+function progressLoad() {
+  let data = null;
+  try {
+    const raw = localStorage.getItem(PROGRESS_KEY);
+    data = raw ? JSON.parse(raw) : null;
+  } catch(e) { data = progressMem; }
+  if(!data || !Array.isArray(data.sets) || !Array.isArray(data.sess)) data = { v:1, sets:[], sess:[] };
+  return data;
+}
+function progressSave(data) {
+  progressMem = data;
+  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+// Local calendar day as "2026-11-21" (so "today" follows the phone's own clock and time zone)
+function dayKey(t) {
+  const d = new Date(t);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function dayNum(key) { const p = key.split('-'); return Math.round(Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000); }
+
+// One finished set → saved. Returns how many sets were done today.
+function progressLogSet(exEntry) {
+  const w = workoutState, data = progressLoad(), now = Date.now();
+  if(!w.sid) {
+    w.sid = 's' + w.startedAt;
+    data.sess.push({ id:w.sid, rt:currentRoutine.id, nm:currentRoutine.name, cat:currentRoutine.cat, t0:w.startedAt, secs:0, sets:0, fin:false });
+  }
+  const ex = EXERCISES.find(e => e.id === exEntry.id);
+  data.sets.push({ t:now, ex:exEntry.id, m:ex ? ex.muscle : 'other', rt:currentRoutine.id, sid:w.sid });
+  const s = data.sess.find(x => x.id === w.sid);
+  if(s) { s.sets++; s.secs = w.elapsed; }
+  if(data.sets.length > 4000) data.sets.splice(0, data.sets.length - 4000);   // keep the file small
+  if(data.sess.length > 600) data.sess.splice(0, data.sess.length - 600);
+  progressSave(data);
+  const k = dayKey(now);
+  return data.sets.filter(x => dayKey(x.t) === k).length;
+}
+
+// Workout over (finished = reached the end, otherwise ended early). Returns false if no set was done, so nothing exists to save.
+function progressEnd(finished) {
+  const w = workoutState;
+  if(!w.sid) return false;
+  const data = progressLoad();
+  const s = data.sess.find(x => x.id === w.sid);
+  if(s) { s.secs = w.elapsed; s.fin = s.fin || !!finished; progressSave(data); }
+  return true;
+}
+
+function progressStats(data, now) {
+  now = now || Date.now();
+  const today = new Date(now), todayKey = dayKey(now);
+  const perDay = {};
+  data.sets.forEach(s => { const k = dayKey(s.t); perDay[k] = (perDay[k] || 0) + 1; });
+  const nums = Object.keys(perDay).map(dayNum).filter(Number.isFinite).sort((a, b) => a - b);
+  const have = new Set(nums);
+  // streak = days in a row with at least one finished set, counted back from today (yesterday still counts until today is over)
+  let streak = 0, cur = dayNum(todayKey);
+  if(!have.has(cur)) cur--;
+  while(have.has(cur)) { streak++; cur--; }
+  let best = 0, run = 0;
+  nums.forEach((n, i) => { run = i > 0 && n === nums[i - 1] + 1 ? run + 1 : 1; if(run > best) best = run; });
+  // this week, Monday first
+  const dow = (today.getDay() + 6) % 7;
+  const week = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((name, i) => {
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dow + i);
+    return { name, n: perDay[dayKey(d)] || 0, today: i === dow, future: i > dow };
+  });
+  // muscle focus = share of the sets from the last 7 days (today and the 6 days before)
+  const from = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6).getTime();
+  const recent = data.sets.filter(s => s.t >= from);
+  const mc = {};
+  recent.forEach(s => { mc[s.m] = (mc[s.m] || 0) + 1; });
+  const muscles = Object.keys(mc).map(m => ({ m, n: mc[m], p: Math.round(mc[m] / recent.length * 100) })).sort((a, b) => b.n - a.n);
+  // badges are worked out from the saved data, nothing is pre-awarded
+  const fin = data.sess.filter(s => s.fin);
+  const finCat = list => fin.filter(s => list.includes(s.cat)).length;
+  const coreSets = data.sets.filter(s => s.m === 'core').length;
+  const ach = [
+    { i:'💪', n:'First Workout', d:'Finish a whole workout', cur:fin.length, goal:1 },
+    { i:'🔥', n:'3 Day Streak', d:'Train 3 days in a row', cur:best, goal:3 },
+    { i:'🏆', n:'7 Day Streak', d:'Train 7 days in a row', cur:best, goal:7 },
+    { i:'💎', n:'Core Champion', d:'Do 50 core sets', cur:coreSets, goal:50 },
+    { i:'⚡', n:'HIIT Warrior', d:'Finish 3 HIIT workouts', cur:finCat(['hiit']), goal:3 },
+    { i:'🧘', n:'Yoga Master', d:'Finish 3 yoga or stretch workouts', cur:finCat(['yoga', 'stretch']), goal:3 },
+  ];
+  const secs = data.sess.reduce((a, s) => a + (s.secs || 0), 0);
+  return {
+    workouts: data.sess.length,
+    sets: data.sess.reduce((a, s) => a + (s.sets || 0), 0),
+    mins: Math.round(secs / 60),
+    streak, best, week, muscles, recentSets: recent.length, ach,
+  };
+}
+
 function renderProgress() {
-  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const done = [true,true,false,true,false,false,false];
-  document.getElementById('week-grid').innerHTML = days.map((d,i) => `
-    <div class="day-dot ${done[i]?'done':''}">
-      <div class="d-name">${d}</div>
-      <div class="d-icon">${done[i]?'✓':'·'}</div>
+  const data = progressLoad(), st = progressStats(data);
+  const empty = data.sets.length === 0;
+  const note = document.getElementById('progress-note');
+  note.style.display = empty ? '' : 'none';
+  note.textContent = empty ? 'Nothing logged yet. Start a routine and finish a set — your days, muscles and badges fill in as you go.' : '';
+
+  const tiles = [{ n:st.workouts, l:'Workouts' }, { n:st.sets, l:'Sets done' }, { n:st.mins, l:'Minutes' }, { n:st.streak, l:'Day streak' }];
+  document.getElementById('p-tiles').innerHTML = tiles.map(t => `
+    <div class="p-tile"><div class="p-num">${t.n}</div><div class="p-lbl">${t.l}</div></div>`).join('');
+
+  document.getElementById('week-grid').innerHTML = st.week.map(d => `
+    <div class="day-dot${d.n ? ' done' : ''}${d.today ? ' today' : ''}${d.future ? ' future' : ''}" role="img" aria-label="${d.name}: ${d.n} ${d.n === 1 ? 'set' : 'sets'}${d.today ? ' (today)' : ''}">
+      <div class="d-name">${d.name}</div>
+      <div class="d-icon">${d.n ? '✓' : '·'}</div>
     </div>`).join('');
-  const muscles = [{n:'Chest',p:70,c:'#e8ff47'},{n:'Core',p:90,c:'#47d9ff'},{n:'Legs',p:55,c:'#ff4f5e'},{n:'Back',p:40,c:'#a855f7'},{n:'Glutes',p:65,c:'#f59e0b'},{n:'Shoulders',p:30,c:'#10b981'}];
-  document.getElementById('muscles-chart').innerHTML = muscles.map(m => `
-    <div class="muscle-bar">
-      <div class="m-name">${m.n}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${m.p}%;background:${m.c}"></div></div>
-      <div class="m-pct">${m.p}%</div>
-    </div>`).join('');
-  const achs = [{i:'🔥',n:'3 Day Streak',e:true},{i:'💪',n:'First Workout',e:true},{i:'⚡',n:'HIIT Warrior',e:false},{i:'🧘',n:'Yoga Master',e:false},{i:'🏆',n:'7 Day Streak',e:false},{i:'💎',n:'Core Champion',e:true}];
-  document.getElementById('achievements-grid').innerHTML = achs.map(a => `
-    <div class="ach-badge ${a.e?'earned':''}">
+
+  document.getElementById('muscles-chart').innerHTML = st.muscles.length
+    ? st.muscles.map(m => `
+      <div class="muscle-bar">
+        <div class="m-name">${escHtml(m.m.charAt(0).toUpperCase() + m.m.slice(1))}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${m.p}%;background:${MUSCLE_COLORS[m.m] || '#7070a0'}"></div></div>
+        <div class="m-pct">${m.p}%</div>
+      </div>`).join('') + `<div class="m-foot">Share of the ${st.recentSets} ${st.recentSets === 1 ? 'set' : 'sets'} you finished in the last 7 days</div>`
+    : '<div class="m-empty">No finished sets in the last 7 days yet.</div>';
+
+  const rec = data.sess.slice(-5).reverse();
+  document.getElementById('recent-list').innerHTML = rec.length
+    ? rec.map(s => {
+        const d = new Date(s.t0);
+        const when = d.toLocaleDateString(undefined, { weekday:'short', day:'numeric', month:'short' }) + ' · ' + d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+        return `<div class="recent-row">
+          <div class="r-main"><div class="r-name">${escHtml(s.nm)}</div><div class="r-when">${escHtml(when)}</div></div>
+          <div class="r-stat">${s.sets} ${s.sets === 1 ? 'set' : 'sets'} <small>${s.fin ? 'finished ✓' : 'ended early'}</small></div>
+        </div>`;
+      }).join('')
+    : '<div class="recent-empty">No workouts yet.</div>';
+
+  document.getElementById('achievements-grid').innerHTML = st.ach.map(a => {
+    const earned = a.cur >= a.goal;
+    return `<div class="ach-badge ${earned ? 'earned' : ''}">
       <div class="ach-icon">${a.i}</div>
       <div class="ach-name">${a.n}</div>
-    </div>`).join('');
+      <div class="ach-desc">${a.d}</div>
+      <div class="ach-prog">${earned ? '✓ Earned' : Math.min(a.cur, a.goal) + ' / ' + a.goal}</div>
+    </div>`;
+  }).join('');
+}
+
+// Two taps to erase (the first one only arms the button)
+let resetArmT = null;
+function progressResetTap() {
+  const b = document.getElementById('reset-btn');
+  if(!b.classList.contains('armed')) {
+    b.classList.add('armed'); b.textContent = 'Tap again to erase all progress';
+    clearTimeout(resetArmT);
+    resetArmT = setTimeout(() => { b.classList.remove('armed'); b.textContent = 'Reset progress'; }, 4000);
+    return;
+  }
+  clearTimeout(resetArmT);
+  b.classList.remove('armed'); b.textContent = 'Reset progress';
+  progressSave({ v:1, sets:[], sess:[] });
+  workoutState.sid = null;
+  renderProgress();
+  toast('Progress erased');
+}
+
+// Small message at the top of the screen
+let toastT = null;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function toastHide() {
+  clearTimeout(toastT);
+  const t = document.getElementById('toast');
+  if(t) t.classList.remove('show');
 }
 
 // ─── MODALS ───────────────────────────────────────────────────────────
 function openRoutine(id) {
+  if(workoutState.live && Date.now() - workoutState.startedAt < 1500) return;   // a stray tap while the workout is opening
   currentRoutine = ROUTINES.find(r => r.id === id);
   if(!currentRoutine) return;
   const r = currentRoutine;
@@ -1689,21 +1913,51 @@ function closeExModal(e) {
 }
 
 // ─── ACTIVE WORKOUT ──────────────────────────────────────────────────
+// Safety: for a moment after a new exercise appears, the footer buttons ignore taps (and look dimmed).
+// Without it, a second tap on START WORKOUT lands on COMPLETE SET, which sits in the same spot,
+// counts a set and jumps straight to the rest countdown.
+const AW_LOCK_MS = 1300;
+const REST_SECS = 30;
+let awLockT = null;
+
+function awLocked() { return Date.now() < (workoutState.lockUntil || 0); }
+function awLock(ms) {
+  workoutState.lockUntil = Date.now() + ms;
+  const f = document.querySelector('.aw-footer');
+  if(f) f.classList.add('locked');
+  clearTimeout(awLockT);
+  awLockT = setTimeout(() => { const g = document.querySelector('.aw-footer'); if(g) g.classList.remove('locked'); }, ms);
+}
+function awUnlock() {
+  clearTimeout(awLockT);
+  workoutState.lockUntil = 0;
+  const f = document.querySelector('.aw-footer');
+  if(f) f.classList.remove('locked');
+}
+
 function startWorkout() {
+  if(!currentRoutine) return;
+  // A second tap on START (or a second call) while the workout is opening must not begin another one
+  if(workoutState.live && Date.now() - workoutState.startedAt < 1500) return;
+  clearInterval(workoutState.elapsedInterval);
+  clearInterval(workoutState.restInterval);
+  clearTimeout(workoutState.confirmT);
   document.getElementById('routine-modal').classList.remove('open');
-  setTimeout(() => {
-    document.getElementById('active-workout').classList.add('open');
-    workoutState = { exIdx:0, setNum:1, totalSets:0, elapsed:0, paused:false };
-    keepAwake(true);
-    workoutState.elapsedInterval = setInterval(() => {
-      if(workoutState.paused) return;
-      workoutState.elapsed++;
-      const m = String(Math.floor(workoutState.elapsed/60)).padStart(2,'0');
-      const s = String(workoutState.elapsed%60).padStart(2,'0');
-      document.getElementById('aw-elapsed').textContent = `${m}:${s}`;
-    }, 1000);
-    renderActiveExercise();
-  }, 200);
+  document.getElementById('rest-screen').classList.remove('open');
+  workoutState = { exIdx:0, setNum:1, totalSets:0, elapsed:0, paused:false, live:true, done:false, startedAt:Date.now(),
+                   sid:null, lockUntil:0, resting:false, restEnd:null, restRemain:null, confirmUntil:0 };
+  document.getElementById('aw-elapsed').textContent = '00:00';
+  unlockAudio();   // inside the tap, so the timers can beep by themselves later
+  keepAwake(true);
+  document.getElementById('active-workout').classList.add('open');
+  workoutState.elapsedInterval = setInterval(() => {
+    if(workoutState.paused) return;
+    workoutState.elapsed++;
+    const m = String(Math.floor(workoutState.elapsed/60)).padStart(2,'0');
+    const s = String(workoutState.elapsed%60).padStart(2,'0');
+    document.getElementById('aw-elapsed').textContent = `${m}:${s}`;
+  }, 1000);
+  renderActiveExercise();
 }
 
 // Reads the leading number and unit from targets like "30s hold", "20–30s each leg", "10 reps" or "5 min"
@@ -1718,10 +1972,29 @@ function parseTarget(reps) {
   return { count: m[1].replace(/\s+/g,''), unit };
 }
 
+// Label of the main footer button ("COMPLETE SET 2/3", "NEXT EXERCISE →", "FINISH WORKOUT")
+function awSetNextLabel() {
+  const w = workoutState, list = currentRoutine && currentRoutine.exercises;
+  const exEntry = list && list[w.exIdx];
+  const b = document.getElementById('aw-next-btn');
+  b.classList.remove('confirm');
+  if(!exEntry) return;
+  const maxSets = exEntry.sets || 3;
+  b.textContent = w.setNum >= maxSets
+    ? (w.exIdx + 1 >= list.length ? 'FINISH WORKOUT 🎉' : 'NEXT EXERCISE →')
+    : `COMPLETE SET ${w.setNum}/${maxSets}`;
+}
+function awConfirmClear() {
+  clearTimeout(workoutState.confirmT);
+  workoutState.confirmUntil = 0;
+  awSetNextLabel();
+}
+
 async function renderActiveExercise() {
   if(!currentRoutine) return;
   const exList = currentRoutine.exercises;
   const exEntry = exList[workoutState.exIdx];
+  if(!exEntry) return;
   const exData = EXERCISES.find(e=>e.id===exEntry.id) || {name:exEntry.id,icon:'💪',tip:''};
   const totalExercises = exList.length;
   document.getElementById('aw-routine-name').textContent = currentRoutine.name;
@@ -1745,23 +2018,53 @@ async function renderActiveExercise() {
   }
   const progress = (workoutState.exIdx / totalExercises) * 100;
   document.getElementById('aw-progress-fill').style.width = progress + '%';
-  const maxSets = exEntry.sets || 3;
-  if(workoutState.setNum >= maxSets) {
-    document.getElementById('aw-next-btn').textContent = workoutState.exIdx+1 >= totalExercises ? 'FINISH WORKOUT 🎉' : 'NEXT EXERCISE →';
-  } else {
-    document.getElementById('aw-next-btn').textContent = `COMPLETE SET ${workoutState.setNum}/${maxSets}`;
+  awConfirmClear();            // main button label
+  awLock(AW_LOCK_MS);          // ignore stray taps for a moment
+  if(autoOn && !workoutState.paused) holdAutoStart();   // timed exercise: the get-ready countdown starts by itself
+}
+
+// Footer buttons: the taps go through the lock (and a confirm while a timer is still counting)
+function nextSetTap() {
+  if(awLocked() || workoutState.resting) return;
+  const h = holdT, w = workoutState;
+  if(h && h.phase !== 'done' && Date.now() > (w.confirmUntil || 0)) {
+    // the timer hasn't finished: ask once before counting this set as done
+    w.confirmUntil = Date.now() + 3000;
+    const b = document.getElementById('aw-next-btn');
+    b.textContent = h.phase === 'idle' ? 'TAP AGAIN TO SKIP THE TIMER' : 'TAP AGAIN TO END THE SET EARLY';
+    b.classList.add('confirm');
+    clearTimeout(w.confirmT);
+    w.confirmT = setTimeout(awConfirmClear, 3000);
+    return;
   }
+  nextSet();
+}
+function skipExerciseTap() {
+  if(awLocked() || workoutState.resting) return;
+  skipExercise();
+}
+function skipRestTap() {
+  if(Date.now() - (workoutState.restOpenAt || 0) < 700) return;   // a stray tap right as the rest screen appears
+  skipRest();
+}
+function pauseTap() {
+  if(awLocked()) return;
+  togglePause();
 }
 
 function nextSet() {
-  if(!currentRoutine) return;
-  holdStop();
+  if(!currentRoutine || workoutState.resting) return;
   const exEntry = currentRoutine.exercises[workoutState.exIdx];
+  if(!exEntry) return;
+  awConfirmClear();
+  holdStop();
   const maxSets = exEntry.sets || 3;
   workoutState.totalSets++;
+  const today = progressLogSet(exEntry);   // saved right now, so Progress is right even if the app is closed mid-workout
   if(workoutState.setNum < maxSets) {
     workoutState.setNum++;
     showRest(exEntry);
+    toast(`✓ Set saved to Progress · ${today} today`);
   } else {
     workoutState.exIdx++;
     workoutState.setNum = 1;
@@ -1769,31 +2072,53 @@ function nextSet() {
       finishWorkoutFlow();
     } else {
       showRest(currentRoutine.exercises[workoutState.exIdx]);
+      toast(`✓ Set saved to Progress · ${today} today`);
     }
   }
 }
 
+// Rest countdown: based on the clock, so it stays right if the phone throttles the page, and Pause freezes it
 function showRest(nextExEntry) {
-  const restDuration = 30;
-  let restRemaining = restDuration;
+  const w = workoutState;
+  clearInterval(w.restInterval);
   const nextEx = EXERCISES.find(e=>e.id===nextExEntry.id);
-  document.getElementById('rest-next-ex').textContent = nextEx ? nextEx.name : 'Next Exercise';
-  document.getElementById('rest-countdown').textContent = restRemaining;
+  const maxSets = nextExEntry.sets || 3;
+  document.getElementById('rest-next-ex').textContent = (nextEx ? nextEx.name : 'Next Exercise') + (maxSets > 1 ? ` · set ${w.setNum} of ${maxSets}` : '');
+  w.resting = true;
+  w.restOpenAt = Date.now();
+  w.restEnd = w.restOpenAt + REST_SECS * 1000;
+  w.restRemain = null;
+  w.restShown = REST_SECS;
+  document.getElementById('rest-countdown').textContent = REST_SECS;
   document.getElementById('rest-screen').classList.add('open');
-  workoutState.restInterval = setInterval(() => {
-    restRemaining--;
-    document.getElementById('rest-countdown').textContent = restRemaining;
-    if(restRemaining <= 0) skipRest();
-  }, 1000);
+  w.restInterval = setInterval(restTick, 250);
 }
 
-function skipRest() {
-  clearInterval(workoutState.restInterval);
+function restTick() {
+  const w = workoutState;
+  if(w.paused || w.restEnd == null) return;
+  const left = Math.max(0, Math.ceil((w.restEnd - Date.now()) / 1000));
+  if(left !== w.restShown) {
+    w.restShown = left;
+    document.getElementById('rest-countdown').textContent = left;
+    if(left >= 1 && left <= 3) { cue(660, 110, .22); buzz(30); }   // 3-2-1
+  }
+  if(left <= 0) skipRest(true);
+}
+
+function skipRest(auto) {
+  const w = workoutState;
+  if(!w.resting) return;
+  clearInterval(w.restInterval);
+  w.resting = false; w.restEnd = null; w.restRemain = null;
   document.getElementById('rest-screen').classList.remove('open');
+  if(auto === true) buzz(60);
   renderActiveExercise();
 }
 
 function skipExercise() {
+  if(!currentRoutine || workoutState.resting) return;
+  awConfirmClear();
   workoutState.exIdx++;
   workoutState.setNum = 1;
   if(workoutState.exIdx >= currentRoutine.exercises.length) finishWorkoutFlow();
@@ -1804,12 +2129,32 @@ function finishWorkoutFlow() {
   awStopSlides(); awCloseGuide();
   holdStop();
   keepAwake(false);
-  clearInterval(workoutState.elapsedInterval);
-  const m = String(Math.floor(workoutState.elapsed/60)).padStart(2,'0');
-  const s = String(workoutState.elapsed%60).padStart(2,'0');
+  const w = workoutState;
+  clearInterval(w.elapsedInterval);
+  clearInterval(w.restInterval);
+  clearTimeout(w.confirmT);
+  w.resting = false; w.restEnd = null; w.restRemain = null; w.done = true;
+  awUnlock();
+  const m = String(Math.floor(w.elapsed/60)).padStart(2,'0');
+  const s = String(w.elapsed%60).padStart(2,'0');
   document.getElementById('c-time').textContent = `${m}:${s}`;
-  document.getElementById('c-sets').textContent = workoutState.totalSets;
-  document.getElementById('c-cal').textContent = Math.round(workoutState.elapsed/60 * 8);
+  document.getElementById('c-sets').textContent = w.totalSets;
+  document.getElementById('c-cal').textContent = Math.round(w.elapsed/60 * 8);
+  const saved = progressEnd(true);   // marks the workout as finished (only if at least one set was really done)
+  const title = document.getElementById('c-title'), msg = document.getElementById('c-msg'), note = document.getElementById('c-saved');
+  if(saved) {
+    title.innerHTML = 'WORKOUT <br>COMPLETE!';
+    msg.textContent = 'Amazing work! You crushed it. Your body is getting stronger every session.';
+    const st = progressStats(progressLoad());
+    note.className = 'complete-saved';
+    note.textContent = '✓ Saved to your progress' + (st.streak >= 2 ? ` · ${st.streak} days in a row` : '');
+  } else {
+    title.innerHTML = 'NO SETS<br>LOGGED';
+    msg.textContent = 'You skipped every exercise, so nothing was added to your progress.';
+    note.className = 'complete-saved none';
+    note.textContent = '';
+  }
+  toastHide();   // an older "set saved · N today" note would show a smaller number than this screen
   document.getElementById('complete-screen').classList.add('open');
 }
 
@@ -1817,6 +2162,8 @@ function finishWorkout() {
   document.getElementById('complete-screen').classList.remove('open');
   document.getElementById('active-workout').classList.remove('open');
   document.getElementById('aw-progress-fill').style.width = '0%';
+  workoutState.live = false;
+  renderProgress();
 }
 
 function togglePause() {
@@ -1824,8 +2171,8 @@ function togglePause() {
   const overlay = document.getElementById('pause-overlay');
   const btn = document.getElementById('aw-pause-btn');
   if(workoutState.paused) {
-    // Pause rest timer too if active
-    clearInterval(workoutState.restInterval);
+    // freeze the rest countdown too (it carries on from the same number on Resume)
+    if(workoutState.restEnd != null) workoutState.restRemain = workoutState.restEnd - Date.now();
     holdPause();
     overlay.classList.add('open');
     if(btn) { btn.classList.add('paused'); btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Resume`; }
@@ -1835,6 +2182,7 @@ function togglePause() {
     const lbl = document.getElementById('pause-elapsed-label');
     if(lbl) lbl.textContent = `${m}:${s} elapsed`;
   } else {
+    if(workoutState.restRemain != null) { workoutState.restEnd = Date.now() + workoutState.restRemain; workoutState.restRemain = null; }
     holdResume();
     overlay.classList.remove('open');
     if(btn) { btn.classList.remove('paused'); btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`; }
@@ -1845,14 +2193,20 @@ function exitWorkout() {
   awStopSlides(); awCloseGuide();
   holdStop();
   keepAwake(false);
-  clearInterval(workoutState.elapsedInterval);
-  clearInterval(workoutState.restInterval);
-  workoutState.paused = false;
+  const w = workoutState;
+  clearInterval(w.elapsedInterval);
+  clearInterval(w.restInterval);
+  clearTimeout(w.confirmT);
+  awUnlock();
+  const hadSets = progressEnd(false);   // keeps the sets already done; nothing is added for what wasn't done
+  if(hadSets && !w.done) toast(`Workout ended · ${w.totalSets} ${w.totalSets === 1 ? 'set' : 'sets'} saved to Progress`);
+  w.paused = false; w.live = false; w.resting = false; w.restEnd = null; w.restRemain = null;
   const pauseBtn = document.getElementById('aw-pause-btn');
   if(pauseBtn) { pauseBtn.classList.remove('paused'); pauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause`; }
   document.getElementById('pause-overlay').classList.remove('open');
   document.getElementById('rest-screen').classList.remove('open');
   document.getElementById('active-workout').classList.remove('open');
+  renderProgress();
 }
 
 // ─── HOLD TIMER ──────────────────────────────────────────────────────
@@ -1860,6 +2214,10 @@ function exitWorkout() {
 // Flow: idle → ready (get into position) → hold → [switch → hold …] → done → the set completes itself.
 const HOLD_READY_SECS = 5;
 const HOLD_SWITCH_SECS = 5;
+const HOLD_FIRST_READY_SECS = 10;   // very first exercise: time to put the phone down and get into position
+const HOLD_REP_REST_SECS = 8;       // rest between the separate holds of "5 × 3–5s"
+let autoOn = true;                  // AUTO: timed exercises start by themselves (switch on the timer card)
+try { autoOn = localStorage.getItem('ironbody-auto') !== 'off'; } catch(e) {}
 let holdT = null;
 let cuesOn = true;
 try { cuesOn = localStorage.getItem('ironbody-cues') !== 'off'; } catch(e) {}
@@ -1990,6 +2348,36 @@ function holdCancel() {
   holdRender();
 }
 
+// Taps on the footer button go through the start-up lock
+function holdStartTap() {
+  if(awLocked()) return;
+  holdStart();
+}
+
+// AUTO: a timed exercise starts its get-ready countdown by itself as soon as it appears (no tap needed).
+// The first exercise gets a longer countdown, because the phone has just been put down.
+function holdAutoStart() {
+  const h = holdT; if(!h || h.phase !== 'idle') return;
+  const first = workoutState.exIdx === 0 && workoutState.setNum === 1;
+  holdBegin('ready', first ? HOLD_FIRST_READY_SECS : HOLD_READY_SECS);
+}
+
+function toggleAuto() {
+  autoOn = !autoOn;
+  try { localStorage.setItem('ironbody-auto', autoOn ? 'on' : 'off'); } catch(e) {}
+  holdRender();
+  if(autoOn && holdT && holdT.phase === 'idle' && !workoutState.paused && !workoutState.resting) holdAutoStart();
+  toast(autoOn ? 'AUTO: timers start by themselves' : 'MANUAL: tap START TIMER');
+}
+
+// Browsers only allow sound after a tap, so START WORKOUT wakes the audio engine up
+function unlockAudio() {
+  try {
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+  } catch(e) {}
+}
+
 function holdTick() {
   const h = holdT;
   if(!h || workoutState.paused) return;
@@ -2024,9 +2412,11 @@ function holdPhaseEnd() {
     return;
   }
   if(plan.reps > 1 && h.rep < plan.reps) {                      // rep done, rest and tap for the next
-    h.rep++; h.part = 0; h.phase = 'idle';
-    clearInterval(h.timer); h.timer = null;
+    h.rep++; h.part = 0;
     cue(880, 150, .25); setTimeout(() => cue(1175, 220, .25), 180); buzz([120, 60, 120]);
+    if(autoOn) { holdBegin('ready', HOLD_REP_REST_SECS, prevEnd); return; }   // AUTO: rest, then the next rep starts by itself
+    h.phase = 'idle';
+    clearInterval(h.timer); h.timer = null;
     holdRender();
     return;
   }
@@ -2054,11 +2444,12 @@ function holdRender(leftMs) {
   const panel = document.getElementById('hold-panel');
   const soundBtn = document.getElementById('hold-sound-btn');
   const startBtn = document.getElementById('hold-start-btn');
+  const autoBtn = document.getElementById('hold-auto-btn');
   const nextBtn = document.getElementById('aw-next-btn');
   const h = holdT;
   if(!h) {
     counter.className = 'aw-counter';
-    panel.style.display = 'none'; soundBtn.style.display = 'none'; startBtn.style.display = 'none';
+    panel.style.display = 'none'; soundBtn.style.display = 'none'; startBtn.style.display = 'none'; autoBtn.style.display = 'none';
     nextBtn.classList.remove('secondary');
     return;
   }
@@ -2070,6 +2461,12 @@ function holdRender(leftMs) {
   const pct = running && h.total && leftMs != null ? Math.min(100, Math.max(0, (h.total - leftMs) / h.total * 100)) : 0;
   const partTxt = plan.parts ? plan.parts[h.part] : (plan.reps > 1 ? `REP ${h.rep} OF ${plan.reps}` : '');
   panel.style.display = ''; soundBtn.style.display = ''; startBtn.style.display = '';
+  autoBtn.style.display = '';
+  autoBtn.classList.toggle('on', autoOn);
+  autoBtn.textContent = autoOn ? 'AUTO' : 'MANUAL';
+  autoBtn.setAttribute('aria-pressed', autoOn ? 'true' : 'false');
+  autoBtn.setAttribute('aria-label', autoOn ? 'Timers start by themselves. Tap to switch to manual start.' : 'Timers wait for a tap. Tap to switch to automatic start.');
+  autoBtn.title = autoBtn.getAttribute('aria-label');
   nextBtn.classList.add('secondary');
   holdSoundUI();
   counter.className = 'aw-counter timed' + (h.phase === 'ready' || h.phase === 'switch' ? ' ready' : h.phase === 'done' ? ' done' : '');
@@ -2079,7 +2476,7 @@ function holdRender(leftMs) {
   bar.style.width = (h.phase === 'done' ? 100 : pct) + '%';
   if(h.phase === 'ready') {
     num.textContent = sec; lbl.textContent = 'GET READY' + (partTxt ? ' · ' + partTxt : '');
-    msg.textContent = 'Get into position';
+    msg.textContent = (plan.reps > 1 && h.rep > 1) ? 'Rest a moment, the next rep is about to start' : 'Get into position';
   } else if(h.phase === 'hold') {
     num.textContent = fmtClock(sec); lbl.textContent = 'TIME LEFT' + (partTxt ? ' · ' + partTxt : '');
     msg.textContent = h.minDone ? 'Minimum reached — keep going to the end if you can' : 'Keep breathing and hold good form';
@@ -2185,6 +2582,7 @@ function switchPage(id, btn) {
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   btn.classList.add('active');
+  if(id === 'progress') renderProgress();   // always shows what is saved right now
 }
 
 // Esc closes an open dialog (handy in a desktop browser)

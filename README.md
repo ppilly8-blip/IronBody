@@ -24,6 +24,19 @@ it automatically from `.github/workflows/pages.yml`.
 After its first visit, the app uses an offline cache. Internet is still needed
 for remotely loaded Wikipedia exercise photographs.
 
+## Timers and progress
+
+- Timed exercises start their own countdown (**AUTO**): a short get-ready count,
+  then the hold. Tap the **AUTO** pill on the timer card to switch to **MANUAL**
+  and press START TIMER yourself.
+- **Progress** counts only sets you really finish. Opening a routine, pressing
+  START or skipping an exercise adds nothing. Each finished set is saved on the
+  phone at that moment, and the days, streak, muscle focus and badges are worked
+  out from those saved sets.
+- Progress stays on the device (nothing is uploaded) and is kept when a newer
+  build is installed over the old one. Clearing the app's data or uninstalling it
+  erases it, and so does **Reset progress** on the Progress page.
+
 ## Install the Android app
 
 1. Download [IronBody.apk](https://github.com/ppilly8-blip/IronBody/releases/latest/download/IronBody.apk).
