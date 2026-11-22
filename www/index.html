@@ -327,6 +327,7 @@
   .hold-start { padding:18px; background:var(--accent); color:#000; border:none; border-radius:14px; font-family:var(--font-display); font-size:22px; letter-spacing:1px; cursor:pointer; transition:transform .15s; }
   .hold-start:active { transform:scale(.97); }
   .hold-start.running { background:var(--card); color:var(--accent2); border:1px solid rgba(255,79,94,.4); }
+  .hold-start.ghost { padding:13px; background:none; border:1px solid var(--border); color:var(--text); font-family:var(--font-body); font-size:15px; font-weight:600; letter-spacing:0; }
   .aw-next-btn.secondary { padding:13px; background:none; border:1px solid var(--border); color:var(--text); font-family:var(--font-body); font-size:15px; font-weight:600; letter-spacing:0; }
   .aw-set-info { display:flex; gap:8px; margin-bottom:24px; }
   .set-pip { width:10px; height:10px; border-radius:50%; background:var(--border); transition:background .3s; }
@@ -484,6 +485,10 @@
     .aw-content:has(.aw-counter.timed) .aw-counter.timed { padding:18px 20px 14px; }
     .aw-content:has(.aw-counter.timed) .aw-set-info { margin-bottom:14px; }
   }
+  /* tall phones: an exercise counted in reps keeps the larger picture (the countdown card sits below it) */
+  @media (max-width:699px) and (min-height:840px) {
+    .aw-content:has(.aw-counter.reps) .aw-img-wrap { --aw-w:clamp(160px, 52vw, 220px); width:var(--aw-w); height:calc(var(--aw-w) / 1.6); }
+  }
 
   /* short windows (small phones, shallow browser windows): tighter workout screen */
   @media (max-height:700px) {
@@ -501,6 +506,7 @@
     .aw-footer { padding-top:10px; padding-bottom:max(10px, env(safe-area-inset-bottom)); gap:8px; }
     .aw-next-btn, .hold-start { padding:13px; font-size:20px; }
     .aw-next-btn.secondary { padding:10px; font-size:14px; }
+    .hold-start.ghost { padding:10px; font-size:14px; }
     .rest-countdown { font-size:96px; }
   }
   @media (max-height:500px) {
@@ -2027,11 +2033,13 @@ async function renderActiveExercise() {
 function nextSetTap() {
   if(awLocked() || workoutState.resting) return;
   const h = holdT, w = workoutState;
-  if(h && h.phase !== 'done' && Date.now() > (w.confirmUntil || 0)) {
-    // the timer hasn't finished: ask once before counting this set as done
+  // a timed set has to run out first; a counted (reps) set only waits while the get-ready countdown is still running
+  const waiting = h && (h.plan.repsOnly ? h.phase === 'ready' : h.phase !== 'done');
+  if(waiting && Date.now() > (w.confirmUntil || 0)) {
+    // ask once before counting this set as done
     w.confirmUntil = Date.now() + 3000;
     const b = document.getElementById('aw-next-btn');
-    b.textContent = h.phase === 'idle' ? 'TAP AGAIN TO SKIP THE TIMER' : 'TAP AGAIN TO END THE SET EARLY';
+    b.textContent = h.plan.repsOnly ? 'TAP AGAIN TO COMPLETE THE SET' : (h.phase === 'idle' ? 'TAP AGAIN TO SKIP THE TIMER' : 'TAP AGAIN TO END THE SET EARLY');
     b.classList.add('confirm');
     clearTimeout(w.confirmT);
     w.confirmT = setTimeout(awConfirmClear, 3000);
@@ -2306,16 +2314,15 @@ document.addEventListener('visibilitychange', () => {
 
 function holdSetup(exEntry) {
   holdStop();
-  const plan = parseHold(exEntry.reps);
-  if(plan) {
-    const t = parseTarget(exEntry.reps);
-    holdT = { plan, phase:'idle', part:0, rep:1, idleCount:t.count, idleUnit:t.unit, timer:null, doneTimer:null };
-  }
+  const t = parseTarget(exEntry.reps);
+  // an exercise counted in reps gets a get-ready countdown only (repsOnly); a timed one gets the whole hold timer
+  const plan = parseHold(exEntry.reps) || { secs:0, min:0, parts:null, reps:1, repsOnly:true };
+  holdT = { plan, phase:'idle', part:0, rep:1, idleCount:t.count, idleUnit:t.unit, timer:null, doneTimer:null, goTimer:null };
   holdRender();
 }
 
 function holdStop() {
-  if(holdT) { clearInterval(holdT.timer); clearTimeout(holdT.doneTimer); }
+  if(holdT) { clearInterval(holdT.timer); clearTimeout(holdT.doneTimer); clearTimeout(holdT.goTimer); }
   holdT = null;
   holdRender();
 }
@@ -2335,6 +2342,7 @@ function holdBegin(phase, secs, from) {
 // The footer button starts the timer, or cancels it while it's running
 function holdStart() {
   const h = holdT; if(!h) return;
+  if(h.plan.repsOnly && h.phase === 'ready') { holdPhaseEnd(); return; }   // SKIP COUNTDOWN: straight to GO
   if(h.phase !== 'idle') { holdCancel(); return; }
   cue(520, 70, .14); buzz(25);   // inside the tap, so the browser allows sound
   holdBegin('ready', HOLD_READY_SECS);
@@ -2367,7 +2375,7 @@ function toggleAuto() {
   try { localStorage.setItem('ironbody-auto', autoOn ? 'on' : 'off'); } catch(e) {}
   holdRender();
   if(autoOn && holdT && holdT.phase === 'idle' && !workoutState.paused && !workoutState.resting) holdAutoStart();
-  toast(autoOn ? 'AUTO: timers start by themselves' : 'MANUAL: tap START TIMER');
+  toast(autoOn ? 'AUTO: countdowns start by themselves' : 'MANUAL: tap START to begin a countdown');
 }
 
 // Browsers only allow sound after a tap, so START WORKOUT wakes the audio engine up
@@ -2400,6 +2408,14 @@ function holdTick() {
 function holdPhaseEnd() {
   const h = holdT; if(!h) return;
   const plan = h.plan, prevEnd = h.endAt;
+  if(plan.repsOnly) {                                           // counted exercise: the countdown ends with GO, then the reps are yours
+    clearInterval(h.timer); h.timer = null;
+    cue(990, 380, .3); buzz(180);
+    h.phase = 'go'; h.goUntil = Date.now() + 1300;
+    holdRender();
+    h.goTimer = setTimeout(() => { if(holdT === h) holdRender(); }, 1350);
+    return;
+  }
   if(h.phase === 'ready' || h.phase === 'switch') {             // GO
     cue(990, 380, .3); buzz(180);
     holdBegin('hold', plan.secs, prevEnd);
@@ -2454,9 +2470,11 @@ function holdRender(leftMs) {
     return;
   }
   const plan = h.plan;
+  const isReps = !!plan.repsOnly;   // an exercise counted in reps: only a get-ready countdown, the reps are done at your own pace
   const num = document.getElementById('aw-count'), lbl = document.getElementById('aw-count-lbl');
   const msg = document.getElementById('hold-msg'), bar = document.getElementById('hold-bar-fill');
   const running = h.phase === 'ready' || h.phase === 'hold' || h.phase === 'switch';
+  const flash = isReps && h.phase === 'go' && Date.now() < (h.goUntil || 0);   // the "GO!" moment
   const sec = leftMs == null ? 0 : Math.max(0, Math.ceil(leftMs / 1000));
   const pct = running && h.total && leftMs != null ? Math.min(100, Math.max(0, (h.total - leftMs) / h.total * 100)) : 0;
   const partTxt = plan.parts ? plan.parts[h.part] : (plan.reps > 1 ? `REP ${h.rep} OF ${plan.reps}` : '');
@@ -2465,14 +2483,19 @@ function holdRender(leftMs) {
   autoBtn.classList.toggle('on', autoOn);
   autoBtn.textContent = autoOn ? 'AUTO' : 'MANUAL';
   autoBtn.setAttribute('aria-pressed', autoOn ? 'true' : 'false');
-  autoBtn.setAttribute('aria-label', autoOn ? 'Timers start by themselves. Tap to switch to manual start.' : 'Timers wait for a tap. Tap to switch to automatic start.');
+  autoBtn.setAttribute('aria-label', autoOn ? 'Countdowns start by themselves. Tap to switch to manual start.' : 'Countdowns wait for a tap. Tap to switch to automatic start.');
   autoBtn.title = autoBtn.getAttribute('aria-label');
-  nextBtn.classList.add('secondary');
+  nextBtn.classList.toggle('secondary', !isReps);   // reps: COMPLETE SET stays the main button
   holdSoundUI();
-  counter.className = 'aw-counter timed' + (h.phase === 'ready' || h.phase === 'switch' ? ' ready' : h.phase === 'done' ? ' done' : '');
-  startBtn.classList.toggle('running', running);
+  counter.className = 'aw-counter timed' + (isReps ? ' reps' : '') + (h.phase === 'ready' || h.phase === 'switch' ? ' ready' : (h.phase === 'done' || flash) ? ' done' : '');
+  startBtn.classList.toggle('running', running && !isReps);
+  startBtn.classList.toggle('ghost', isReps);
   startBtn.style.visibility = h.phase === 'done' ? 'hidden' : '';
-  startBtn.textContent = running ? '■ CANCEL TIMER' : (plan.reps > 1 ? `▶ START REP ${h.rep} OF ${plan.reps}` : '▶ START TIMER');
+  if(isReps && h.phase === 'go') startBtn.style.display = 'none';   // the countdown is over, nothing left to start
+  startBtn.textContent = isReps
+    ? (h.phase === 'ready' ? '⏭ SKIP COUNTDOWN' : '⏱ START COUNTDOWN')
+    : (running ? '■ CANCEL TIMER' : (plan.reps > 1 ? `▶ START REP ${h.rep} OF ${plan.reps}` : '▶ START TIMER'));
+  if(bar.parentNode) bar.parentNode.style.visibility = isReps && h.phase !== 'ready' ? 'hidden' : '';
   bar.style.width = (h.phase === 'done' ? 100 : pct) + '%';
   if(h.phase === 'ready') {
     num.textContent = sec; lbl.textContent = 'GET READY' + (partTxt ? ' · ' + partTxt : '');
@@ -2485,6 +2508,12 @@ function holdRender(leftMs) {
     msg.textContent = 'Switch now';
   } else if(h.phase === 'done') {
     num.textContent = '✓'; lbl.textContent = 'SET DONE'; msg.textContent = '';
+  } else if(isReps) {
+    if(flash) { num.textContent = 'GO!'; lbl.textContent = 'DO YOUR REPS'; msg.textContent = 'Then tap COMPLETE SET'; }
+    else {
+      num.textContent = h.idleCount; lbl.textContent = h.idleUnit;
+      msg.textContent = h.phase === 'go' ? 'Do your reps, then tap COMPLETE SET' : 'Tap START COUNTDOWN, or just begin';
+    }
   } else {
     num.textContent = plan.reps > 1 ? String(plan.reps - h.rep + 1) : h.idleCount;
     lbl.textContent = plan.reps > 1 ? (h.rep === 1 ? 'REPS' : 'REPS LEFT') : h.idleUnit;

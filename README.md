@@ -26,9 +26,11 @@ for remotely loaded Wikipedia exercise photographs.
 
 ## Timers and progress
 
-- Timed exercises start their own countdown (**AUTO**): a short get-ready count,
-  then the hold. Tap the **AUTO** pill on the timer card to switch to **MANUAL**
-  and press START TIMER yourself.
+- Every exercise opens with a **GET READY** countdown (10 seconds for the first
+  one, 5 after that). A timed exercise then goes straight into its hold; one
+  counted in reps ends the countdown with GO and you do the reps at your own
+  pace. The countdown starts by itself (**AUTO**). Tap the **AUTO** pill on the
+  card to switch to **MANUAL** and start it yourself, or tap SKIP COUNTDOWN.
 - **Progress** counts only sets you really finish. Opening a routine, pressing
   START or skipping an exercise adds nothing. Each finished set is saved on the
   phone at that moment, and the days, streak, muscle focus and badges are worked
