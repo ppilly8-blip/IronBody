@@ -90,12 +90,7 @@
   .meta-item { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--muted); font-family:var(--font-mono); }
   .meta-item svg { width:14px; height:14px; }
   .source-badge { display:inline-flex; align-items:center; gap:4px; font-size:9px; font-family:var(--font-mono); padding:2px 7px; border-radius:4px; margin-left:6px; letter-spacing:.5px; }
-  .source-healthline { background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.3); color:#22c55e; }
-  .source-hinge { background:rgba(129,140,248,.12); border:1px solid rgba(129,140,248,.3); color:#818cf8; }
-  .source-youtube { background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.3); color:#ef4444; }
   .source-iso { background:rgba(139,92,246,.12); border:1px solid rgba(139,92,246,.4); color:#a78bfa; }
-  .source-arata { background:rgba(45,212,191,.12); border:1px solid rgba(45,212,191,.35); color:#2dd4bf; }
-  .source-rep { background:rgba(251,191,36,.12); border:1px solid rgba(251,191,36,.35); color:#fbbf24; }
   .tag.equip { color:#fbbf24; background:rgba(251,191,36,.08); }
   .muscle-tag.equip { background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.35); color:#fbbf24; }
   .ex-info .eq { color:#fbbf24; white-space:nowrap; }
@@ -231,14 +226,7 @@
 
   /* EXERCISE DETAIL MODAL */
   .ex-modal-body { padding:0 20px 20px; }
-  .ex-modal-body .demo-area { background:var(--bg3); border-radius:16px; height:220px; display:flex; align-items:center; justify-content:center; margin-bottom:20px; font-size:80px; border:1px solid var(--border); overflow:hidden; position:relative; }
-  .ex-modal-body .demo-area img { width:100%; height:100%; object-fit:cover; border-radius:16px; }
-  .demo-img-overlay { position:absolute; inset:0; background:linear-gradient(to bottom, transparent 50%, rgba(10,10,15,.85) 100%); border-radius:16px; pointer-events:none; }
-  .demo-img-label { position:absolute; bottom:10px; left:12px; font-size:10px; font-family:var(--font-mono); color:rgba(255,255,255,.55); letter-spacing:1px; }
-  .img-loading { display:flex; flex-direction:column; align-items:center; gap:8px; }
-  .img-loading .spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
-  @keyframes spin { to{transform:rotate(360deg)} }
-  .img-loading p { font-size:11px; color:var(--muted); font-family:var(--font-mono); }
+  .ex-modal-body .demo-area { background:var(--bg3); border-radius:16px; height:112px; display:flex; align-items:center; justify-content:center; margin-bottom:16px; font-size:64px; border:1px solid var(--border); overflow:hidden; position:relative; }
   .ex-modal-body h2 { font-family:var(--font-display); font-size:36px; margin-bottom:6px; }
   .ex-modal-body .ex-desc { color:var(--muted); font-size:14px; line-height:1.7; margin-bottom:20px; }
   .steps-list { display:flex; flex-direction:column; gap:10px; }
@@ -353,6 +341,9 @@
   /* AUTO / MANUAL switch on the timer card */
   .hold-auto { position:absolute; top:10px; left:10px; height:28px; padding:0 10px; border-radius:14px; background:none; border:1px solid var(--border); color:var(--muted); font-family:var(--font-mono); font-size:10px; font-weight:700; letter-spacing:.6px; line-height:1; cursor:pointer; }
   .hold-auto.on { border-color:rgba(232,255,71,.5); color:var(--accent); background:rgba(232,255,71,.08); }
+  /* counted sets in AUTO: while the app counts the reps down, the pace button takes the place of the hint line */
+  .hold-pace { height:30px; margin:2px 0; padding:0 14px; border-radius:15px; background:none; border:1px solid var(--border); color:var(--muted); font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.5px; line-height:1; white-space:nowrap; cursor:pointer; }
+  .hold-pace:active { transform:scale(.97); }
 
   /* PAUSE OVERLAY */
   .pause-overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); backdrop-filter:blur(16px); z-index:360; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s; }
@@ -502,6 +493,7 @@
     .aw-count-num { font-size:64px; }
     .hold-panel { margin-top:10px; }
     .hold-msg { min-height:30px; }
+    .hold-pace { height:26px; }
     .aw-set-info { margin-bottom:14px; }
     .aw-footer { padding-top:10px; padding-bottom:max(10px, env(safe-area-inset-bottom)); gap:8px; }
     .aw-next-btn, .hold-start { padding:13px; font-size:20px; }
@@ -794,6 +786,7 @@
       <div class="hold-panel" id="hold-panel" style="display:none">
         <div class="hold-bar"><div class="hold-bar-fill" id="hold-bar-fill"></div></div>
         <div class="hold-msg" id="hold-msg"></div>
+        <button class="hold-pace" id="hold-pace-btn" onclick="cyclePace()" style="display:none"></button>
       </div>
     </div>
     <div class="aw-set-info" id="aw-sets-pips"></div>
@@ -855,134 +848,134 @@
 // ─── DATA ───────────────────────────────────────────────────────────
 const EXERCISES = [
   // CHEST
-  {id:'pushup',name:'Push-Ups',icon:'💪',muscle:'chest',secondary:'shoulders, triceps',wiki:'Push-up',desc:'The king of bodyweight chest exercises. Works chest, shoulders, and triceps simultaneously.',steps:['Start in high plank: hands slightly wider than shoulder-width, body in straight line','Lower chest toward floor, keeping elbows at 45° angle from body','Stop when chest is just above floor','Push back up through palms to starting position','Keep core braced throughout the movement'],cat:['beginner','strength']},
-  {id:'widepushup',name:'Wide Push-Ups',icon:'🤸',muscle:'chest',secondary:'shoulders',wiki:'Push-up',desc:'Wider hand placement shifts emphasis to the outer chest for more width.',steps:['Place hands 1.5x shoulder-width apart','Fingers pointing slightly outward','Lower with control, feeling the chest stretch','Drive up powerfully','Squeeze chest at top'],cat:['strength']},
-  {id:'diamondpushup',name:'Diamond Push-Ups',icon:'💎',muscle:'chest',secondary:'triceps',wiki:'Diamond push-up',desc:'Narrow diamond grip targets inner chest and heavily loads the triceps.',steps:['Form a diamond shape with thumbs and index fingers','Place hands center of chest on floor','Lower keeping elbows close to body','Feel deep tricep burn on the way up','Great for arm definition'],cat:['strength']},
-  {id:'piketopushup',name:'Pike Push-Ups',icon:'🔺',muscle:'shoulders',secondary:'chest, triceps',wiki:'Pike push-up',desc:'Inverted V position shifts load to shoulders — beginner handstand prep.',steps:['Start in downward dog position','Hands shoulder-width, hips high forming inverted V','Bend elbows lowering head toward floor','Stop before touching floor','Press back up to starting position'],cat:['strength']},
-  {id:'declinepushup',name:'Decline Push-Ups',icon:'📐',muscle:'chest',secondary:'shoulders',wiki:'Push-up',desc:'Elevate feet to target upper chest — creates a more athletic, balanced physique.',steps:['Place feet on a chair or couch','Start in elevated push-up position','Body forms a straight diagonal line','Lower chest toward floor with control','Press back to straight arms'],cat:['strength']},
+  {id:'pushup',name:'Push-Ups',icon:'💪',muscle:'chest',secondary:'shoulders, triceps',desc:'The king of bodyweight chest exercises. Works chest, shoulders, and triceps simultaneously.',steps:['Start in high plank: hands slightly wider than shoulder-width, body in straight line','Lower chest toward floor, keeping elbows at 45° angle from body','Stop when chest is just above floor','Push back up through palms to starting position','Keep core braced throughout the movement'],cat:['beginner','strength']},
+  {id:'widepushup',name:'Wide Push-Ups',icon:'🤸',muscle:'chest',secondary:'shoulders',desc:'Wider hand placement shifts emphasis to the outer chest for more width.',steps:['Place hands 1.5x shoulder-width apart','Fingers pointing slightly outward','Lower with control, feeling the chest stretch','Drive up powerfully','Squeeze chest at top'],cat:['strength']},
+  {id:'diamondpushup',name:'Diamond Push-Ups',icon:'💎',muscle:'chest',secondary:'triceps',desc:'Narrow diamond grip targets inner chest and heavily loads the triceps.',steps:['Form a diamond shape with thumbs and index fingers','Place hands center of chest on floor','Lower keeping elbows close to body','Feel deep tricep burn on the way up','Great for arm definition'],cat:['strength']},
+  {id:'piketopushup',name:'Pike Push-Ups',icon:'🔺',muscle:'shoulders',secondary:'chest, triceps',desc:'Inverted V position shifts load to shoulders — beginner handstand prep.',steps:['Start in downward dog position','Hands shoulder-width, hips high forming inverted V','Bend elbows lowering head toward floor','Stop before touching floor','Press back up to starting position'],cat:['strength']},
+  {id:'declinepushup',name:'Decline Push-Ups',icon:'📐',muscle:'chest',secondary:'shoulders',desc:'Elevate feet to target upper chest — creates a more athletic, balanced physique.',steps:['Place feet on a chair or couch','Start in elevated push-up position','Body forms a straight diagonal line','Lower chest toward floor with control','Press back to straight arms'],cat:['strength']},
   // BACK / PULLING
-  {id:'superman',name:'Superman Hold',icon:'🦸',muscle:'back',secondary:'glutes',wiki:'Superman (exercise)',desc:'Core and back strengthener mimicking a flying position to build posterior chain.',steps:['Lie face down, arms extended overhead','Simultaneously lift arms, chest, and legs off floor','Hold peak position squeezing glutes and back','Lower with control','Breathe steadily throughout'],cat:['beginner','strength']},
-  {id:'reversesnow',name:'Reverse Snow Angel',icon:'❄️',muscle:'back',secondary:'rear delts',wiki:'Superman (exercise)',desc:'Lying face down, sweep arms from hips to overhead activating entire upper back.',steps:['Lie face down, arms along sides, palms up','Squeeze shoulder blades together','Slowly sweep arms up overhead like snow angel','Keep chest slightly lifted','Return to start with control'],cat:['beginner']},
-  {id:'doorpullup',name:'Doorframe Row',icon:'🚪',muscle:'back',secondary:'biceps',wiki:'Australian pull-up',desc:'Using a door frame or low table edge for bodyweight rows — pull day at home.',steps:['Sit under a sturdy table, grip edge with hands','Straighten legs out, body in straight line','Pull chest up to table edge','Squeeze back muscles at top','Lower with control — that\'s one rep'],cat:['strength']},
+  {id:'superman',name:'Superman Hold',icon:'🦸',muscle:'back',secondary:'glutes',desc:'Core and back strengthener mimicking a flying position to build posterior chain.',steps:['Lie face down, arms extended overhead','Simultaneously lift arms, chest, and legs off floor','Hold peak position squeezing glutes and back','Lower with control','Breathe steadily throughout'],cat:['beginner','strength']},
+  {id:'reversesnow',name:'Reverse Snow Angel',icon:'❄️',muscle:'back',secondary:'rear delts',desc:'Lying face down, sweep arms from hips to overhead activating entire upper back.',steps:['Lie face down, arms along sides, palms up','Squeeze shoulder blades together','Slowly sweep arms up overhead like snow angel','Keep chest slightly lifted','Return to start with control'],cat:['beginner']},
+  {id:'doorpullup',name:'Doorframe Row',icon:'🚪',muscle:'back',secondary:'biceps',desc:'Using a door frame or low table edge for bodyweight rows — pull day at home.',steps:['Sit under a sturdy table, grip edge with hands','Straighten legs out, body in straight line','Pull chest up to table edge','Squeeze back muscles at top','Lower with control — that\'s one rep'],cat:['strength']},
   // LEGS
-  {id:'squat',name:'Bodyweight Squat',icon:'🦵',muscle:'legs',secondary:'glutes, core',wiki:'Squat (exercise)',desc:'Foundation of lower body training. Builds powerful quads, glutes, and improves mobility.',steps:['Stand feet shoulder-width apart, toes slightly out','Brace core and push hips back to initiate movement','Lower until thighs are parallel to floor or lower','Keep chest tall, knees tracking over toes','Drive through heels to return to standing'],cat:['beginner','strength']},
-  {id:'lunge',name:'Forward Lunges',icon:'🚶',muscle:'legs',secondary:'glutes, core',wiki:'Lunge (exercise)',desc:'Unilateral movement that corrects imbalances and builds athletic legs.',steps:['Stand tall, hands on hips or clasped at chest','Step forward with right foot — long stride','Lower back knee toward floor (don\'t touch)','Front thigh parallel to floor','Push through front heel to return, switch legs'],cat:['beginner','strength']},
-  {id:'jumpsquat',name:'Jump Squats',icon:'⬆️',muscle:'legs',secondary:'glutes, calves',wiki:'Squat jump',desc:'Explosive power training that torches calories and builds fast-twitch muscle.',steps:['Start in squat position, feet shoulder-width','Squat down to parallel depth','Explode upward jumping as high as possible','Swing arms for momentum','Land softly, absorb impact in hips and knees'],cat:['hiit','cardio']},
-  {id:'walksit',name:'Wall Sit',icon:'🧱',muscle:'legs',secondary:'glutes',wiki:'Wall sit',desc:'Isometric quad torture. Simple but brutal — builds strength and mental toughness.',steps:['Stand with back against wall','Slide down until knees form 90° angle','Thighs parallel to floor, back flat against wall','Hold position, breathe steadily','Keep feet flat, don\'t let knees cave in'],cat:['strength','beginner']},
-  {id:'glmbridge',name:'Glute Bridge',icon:'🌉',muscle:'glutes',secondary:'hamstrings, core',wiki:'Glute bridge',desc:'Hip hinge movement that activates glutes and builds a powerful posterior chain.',steps:['Lie on back, knees bent, feet flat on floor','Arms at sides, palms down for stability','Drive hips up by squeezing glutes hard','Form straight line from knees to shoulders','Hold top position 1-2 seconds, lower slowly'],cat:['beginner','strength']},
-  {id:'singlelegglute',name:'Single Leg Glute Bridge',icon:'🦋',muscle:'glutes',secondary:'hamstrings',wiki:'Glute bridge',desc:'Unilateral version that fixes strength imbalances and doubles the challenge.',steps:['Lie on back, one knee bent, other leg extended','Foot of bent leg flat on floor','Drive through single heel, extending hips up','Body straight from foot to shoulder','Lower with control, complete reps before switching'],cat:['strength']},
-  {id:'donkeykick',name:'Donkey Kicks',icon:'🐴',muscle:'glutes',secondary:'core',wiki:'Donkey kicks',desc:'Isolation movement for glute activation, perfect as a warm-up or finisher.',steps:['Start on all fours — hands under shoulders, knees under hips','Brace core to keep spine neutral','Kick one leg back and up, leading with heel','Squeeze glute hard at top, thigh parallel to floor','Lower with control, don\'t rotate hips'],cat:['beginner']},
-  {id:'calfrise',name:'Calf Raises',icon:'🦶',muscle:'legs',secondary:'ankles',wiki:'Calf raise',desc:'Build lower leg strength and ankle stability with this simple daily exercise.',steps:['Stand near wall or doorframe for balance','Feet hip-width apart, parallel','Slowly rise onto toes as high as possible','Pause and squeeze calves at top','Lower heels slowly all the way down'],cat:['beginner']},
+  {id:'squat',name:'Bodyweight Squat',icon:'🦵',muscle:'legs',secondary:'glutes, core',desc:'Foundation of lower body training. Builds powerful quads, glutes, and improves mobility.',steps:['Stand feet shoulder-width apart, toes slightly out','Brace core and push hips back to initiate movement','Lower until thighs are parallel to floor or lower','Keep chest tall, knees tracking over toes','Drive through heels to return to standing'],cat:['beginner','strength']},
+  {id:'lunge',name:'Forward Lunges',icon:'🚶',muscle:'legs',secondary:'glutes, core',desc:'Unilateral movement that corrects imbalances and builds athletic legs.',steps:['Stand tall, hands on hips or clasped at chest','Step forward with right foot — long stride','Lower back knee toward floor (don\'t touch)','Front thigh parallel to floor','Push through front heel to return, switch legs'],cat:['beginner','strength']},
+  {id:'jumpsquat',name:'Jump Squats',icon:'⬆️',muscle:'legs',secondary:'glutes, calves',desc:'Explosive power training that torches calories and builds fast-twitch muscle.',steps:['Start in squat position, feet shoulder-width','Squat down to parallel depth','Explode upward jumping as high as possible','Swing arms for momentum','Land softly, absorb impact in hips and knees'],cat:['hiit','cardio']},
+  {id:'walksit',name:'Wall Sit',icon:'🧱',muscle:'legs',secondary:'glutes',desc:'Isometric quad torture. Simple but brutal — builds strength and mental toughness.',steps:['Stand with back against wall','Slide down until knees form 90° angle','Thighs parallel to floor, back flat against wall','Hold position, breathe steadily','Keep feet flat, don\'t let knees cave in'],cat:['strength','beginner']},
+  {id:'glmbridge',name:'Glute Bridge',icon:'🌉',muscle:'glutes',secondary:'hamstrings, core',desc:'Hip hinge movement that activates glutes and builds a powerful posterior chain.',steps:['Lie on back, knees bent, feet flat on floor','Arms at sides, palms down for stability','Drive hips up by squeezing glutes hard','Form straight line from knees to shoulders','Hold top position 1-2 seconds, lower slowly'],cat:['beginner','strength']},
+  {id:'singlelegglute',name:'Single Leg Glute Bridge',icon:'🦋',muscle:'glutes',secondary:'hamstrings',desc:'Unilateral version that fixes strength imbalances and doubles the challenge.',steps:['Lie on back, one knee bent, other leg extended','Foot of bent leg flat on floor','Drive through single heel, extending hips up','Body straight from foot to shoulder','Lower with control, complete reps before switching'],cat:['strength']},
+  {id:'donkeykick',name:'Donkey Kicks',icon:'🐴',muscle:'glutes',secondary:'core',desc:'Isolation movement for glute activation, perfect as a warm-up or finisher.',steps:['Start on all fours — hands under shoulders, knees under hips','Brace core to keep spine neutral','Kick one leg back and up, leading with heel','Squeeze glute hard at top, thigh parallel to floor','Lower with control, don\'t rotate hips'],cat:['beginner']},
+  {id:'calfrise',name:'Calf Raises',icon:'🦶',muscle:'legs',secondary:'ankles',desc:'Build lower leg strength and ankle stability with this simple daily exercise.',steps:['Stand near wall or doorframe for balance','Feet hip-width apart, parallel','Slowly rise onto toes as high as possible','Pause and squeeze calves at top','Lower heels slowly all the way down'],cat:['beginner']},
   // CORE
-  {id:'plank',name:'Plank',icon:'📏',muscle:'core',secondary:'shoulders, glutes',wiki:'Plank (exercise)',desc:'The single most effective core exercise. Builds total core stability and endurance.',steps:['Start in push-up position, lower onto forearms','Elbows directly under shoulders','Body forms perfect straight line heel to head','Brace abs like about to take a punch','Hold position, breathe normally — don\'t hold breath'],cat:['beginner','core']},
-  {id:'crunch',name:'Crunches',icon:'💫',muscle:'core',secondary:'hip flexors',wiki:'Crunch (exercise)',desc:'Classic abs exercise focusing on the rectus abdominis for visible six-pack muscles.',steps:['Lie on back, knees bent, feet flat','Hands behind head — don\'t pull neck','Curl shoulders off floor using abs, not momentum','Focus squeeze at top of movement','Lower with control — full range of motion'],cat:['beginner','core']},
-  {id:'bicycle',name:'Bicycle Crunches',icon:'🚲',muscle:'core',secondary:'obliques',wiki:'Bicycle crunch',desc:'Elbow-to-knee motion engages all abs including obliques for total core definition.',steps:['Lie on back, hands behind head, legs lifted','Extend right leg while pulling left knee to chest','Rotate right elbow toward left knee','Alternate sides in a cycling motion','Keep lower back pressed to floor throughout'],cat:['core']},
-  {id:'mountainclimber',name:'Mountain Climbers',icon:'⛰️',muscle:'core',secondary:'cardio, legs',wiki:'Mountain climber (exercise)',desc:'Dynamic full-body movement that combines core training with cardio conditioning.',steps:['Start in high plank position, wrists under shoulders','Drive right knee toward chest quickly','Immediately switch, driving left knee forward','Alternate legs rapidly like running in place','Keep hips low and steady — don\'t bounce them'],cat:['hiit','cardio','core']},
-  {id:'legrise',name:'Leg Raises',icon:'🦵',muscle:'core',secondary:'hip flexors',wiki:'Leg raise',desc:'Lower ab focus. Keeping legs straight increases the difficulty and effectiveness.',steps:['Lie flat on back, legs straight, arms at sides','Press lower back into floor by engaging abs','Slowly raise legs to 90° keeping them straight','Lower legs back down slowly — don\'t let them drop','Stop just before heels touch floor, raise again'],cat:['core']},
-  {id:'russiantwist',name:'Russian Twist',icon:'🔄',muscle:'core',secondary:'obliques',wiki:'Russian twist',desc:'Rotational core exercise targeting obliques for a narrower waist and athletic core.',steps:['Sit on floor, knees bent, lean back 45°','Hold hands together or clasp for a "weight"','Rotate torso right, touching floor beside hip','Rotate to left side — that\'s one rep','For more challenge, lift feet off the floor'],cat:['core']},
-  {id:'sideplank',name:'Side Plank',icon:'↗️',muscle:'core',secondary:'obliques, glutes',wiki:'Side plank',desc:'Lateral stability exercise targeting obliques and preventing lower back injury.',steps:['Lie on side, prop up on forearm, elbow under shoulder','Stack feet or stagger them for stability','Lift hips forming straight line head to feet','Free hand on hip or reaching toward ceiling','Hold position, breathe — don\'t let hips drop'],cat:['core','beginner']},
+  {id:'plank',name:'Plank',icon:'📏',muscle:'core',secondary:'shoulders, glutes',desc:'The single most effective core exercise. Builds total core stability and endurance.',steps:['Start in push-up position, lower onto forearms','Elbows directly under shoulders','Body forms perfect straight line heel to head','Brace abs like about to take a punch','Hold position, breathe normally — don\'t hold breath'],cat:['beginner','core']},
+  {id:'crunch',name:'Crunches',icon:'💫',muscle:'core',secondary:'hip flexors',desc:'Classic abs exercise focusing on the rectus abdominis for visible six-pack muscles.',steps:['Lie on back, knees bent, feet flat','Hands behind head — don\'t pull neck','Curl shoulders off floor using abs, not momentum','Focus squeeze at top of movement','Lower with control — full range of motion'],cat:['beginner','core']},
+  {id:'bicycle',name:'Bicycle Crunches',icon:'🚲',muscle:'core',secondary:'obliques',desc:'Elbow-to-knee motion engages all abs including obliques for total core definition.',steps:['Lie on back, hands behind head, legs lifted','Extend right leg while pulling left knee to chest','Rotate right elbow toward left knee','Alternate sides in a cycling motion','Keep lower back pressed to floor throughout'],cat:['core']},
+  {id:'mountainclimber',name:'Mountain Climbers',icon:'⛰️',muscle:'core',secondary:'cardio, legs',desc:'Dynamic full-body movement that combines core training with cardio conditioning.',steps:['Start in high plank position, wrists under shoulders','Drive right knee toward chest quickly','Immediately switch, driving left knee forward','Alternate legs rapidly like running in place','Keep hips low and steady — don\'t bounce them'],cat:['hiit','cardio','core']},
+  {id:'legrise',name:'Leg Raises',icon:'🦵',muscle:'core',secondary:'hip flexors',desc:'Lower ab focus. Keeping legs straight increases the difficulty and effectiveness.',steps:['Lie flat on back, legs straight, arms at sides','Press lower back into floor by engaging abs','Slowly raise legs to 90° keeping them straight','Lower legs back down slowly — don\'t let them drop','Stop just before heels touch floor, raise again'],cat:['core']},
+  {id:'russiantwist',name:'Russian Twist',icon:'🔄',muscle:'core',secondary:'obliques',desc:'Rotational core exercise targeting obliques for a narrower waist and athletic core.',steps:['Sit on floor, knees bent, lean back 45°','Hold hands together or clasp for a "weight"','Rotate torso right, touching floor beside hip','Rotate to left side — that\'s one rep','For more challenge, lift feet off the floor'],cat:['core']},
+  {id:'sideplank',name:'Side Plank',icon:'↗️',muscle:'core',secondary:'obliques, glutes',desc:'Lateral stability exercise targeting the obliques and deep core.',steps:['Lie on side, prop up on forearm, elbow under shoulder','Stack feet or stagger them for stability','Lift hips forming straight line head to feet','Free hand on hip or reaching toward ceiling','Hold position, breathe — don\'t let hips drop'],cat:['core','beginner']},
   // SHOULDERS
-  {id:'pikepushup2',name:'Shoulder Taps',icon:'👆',muscle:'shoulders',secondary:'core, stability',wiki:'Push-up',desc:'Plank variation that challenges anti-rotation core stability while building shoulder strength.',steps:['Start in high plank position','Without rotating hips, lift right hand to tap left shoulder','Place right hand back, tap right shoulder with left hand','Keep hips level — use core to prevent rotation','Move with control, don\'t rush'],cat:['core','strength']},
-  {id:'armcircle',name:'Arm Circles',icon:'⭕',muscle:'shoulders',secondary:'rotator cuff',wiki:'Arm circle',desc:'Mobility warm-up that activates shoulder girdle and improves range of motion.',steps:['Stand with arms extended straight out to sides','Make small controlled circles forward','Gradually increase circle size','Reverse direction after 15-20 reps','Also do vertical circles for full mobility'],cat:['beginner','stretch']},
+  {id:'pikepushup2',name:'Shoulder Taps',icon:'👆',muscle:'shoulders',secondary:'core, stability',desc:'Plank variation that challenges anti-rotation core stability while building shoulder strength.',steps:['Start in high plank position','Without rotating hips, lift right hand to tap left shoulder','Place right hand back, tap right shoulder with left hand','Keep hips level — use core to prevent rotation','Move with control, don\'t rush'],cat:['core','strength']},
+  {id:'armcircle',name:'Arm Circles',icon:'⭕',muscle:'shoulders',secondary:'rotator cuff',desc:'Mobility warm-up that activates shoulder girdle and improves range of motion.',steps:['Stand with arms extended straight out to sides','Make small controlled circles forward','Gradually increase circle size','Reverse direction after 15-20 reps','Also do vertical circles for full mobility'],cat:['beginner','stretch']},
   // CARDIO / HIIT
-  {id:'jumpingjack',name:'Jumping Jacks',icon:'⭐',muscle:'core',secondary:'cardio, shoulders',wiki:'Jumping jack',desc:'Full-body cardio staple. Raises heart rate rapidly and improves coordination.',steps:['Stand tall, feet together, arms at sides','Jump spreading feet beyond shoulder-width','Simultaneously raise arms overhead','Jump back to starting position','Maintain a steady, controlled rhythm'],cat:['beginner','cardio','hiit']},
-  {id:'highknee',name:'High Knees',icon:'🏃',muscle:'legs',secondary:'cardio, core',wiki:'High-knee running',desc:'Running in place with exaggerated knee drive. Excellent cardio with low impact.',steps:['Stand tall, engage core','Drive right knee up to hip height','Immediately drive left knee up as right returns','Pump arms in opposition to legs','Keep pace steady and breathing controlled'],cat:['cardio','hiit']},
-  {id:'burpee',name:'Burpees',icon:'💥',muscle:'legs',secondary:'chest, core, cardio',wiki:'Burpee (exercise)',desc:'The ultimate total body exercise. Burns maximum calories and builds conditioning.',steps:['Stand tall, then squat down placing hands on floor','Jump feet back into push-up position','Perform a push-up (optional for easier version)','Jump feet back to hands','Explosively jump up reaching arms overhead — land softly'],cat:['hiit','cardio']},
-  {id:'boxstep',name:'Step-Ups',icon:'📦',muscle:'legs',secondary:'glutes, cardio',wiki:'Step aerobics',desc:'Use stairs or a sturdy box to build unilateral leg strength and cardio endurance.',steps:['Stand in front of step, stair, or sturdy box','Step up with right foot, fully extending the leg','Bring left foot up to join','Step down with right foot, then left','Alternate leading foot or complete reps before switching'],cat:['cardio','strength']},
+  {id:'jumpingjack',name:'Jumping Jacks',icon:'⭐',muscle:'core',secondary:'cardio, shoulders',desc:'Full-body cardio staple. Raises heart rate rapidly and improves coordination.',steps:['Stand tall, feet together, arms at sides','Jump spreading feet beyond shoulder-width','Simultaneously raise arms overhead','Jump back to starting position','Maintain a steady, controlled rhythm'],cat:['beginner','cardio','hiit']},
+  {id:'highknee',name:'High Knees',icon:'🏃',muscle:'legs',secondary:'cardio, core',desc:'Running in place with exaggerated knee drive. Excellent cardio with low impact.',steps:['Stand tall, engage core','Drive right knee up to hip height','Immediately drive left knee up as right returns','Pump arms in opposition to legs','Keep pace steady and breathing controlled'],cat:['cardio','hiit']},
+  {id:'burpee',name:'Burpees',icon:'💥',muscle:'legs',secondary:'chest, core, cardio',desc:'A total-body exercise that builds conditioning.',steps:['Stand tall, then squat down placing hands on floor','Jump feet back into push-up position','Perform a push-up (optional for easier version)','Jump feet back to hands','Explosively jump up reaching arms overhead — land softly'],cat:['hiit','cardio']},
+  {id:'boxstep',name:'Step-Ups',icon:'📦',muscle:'legs',secondary:'glutes, cardio',desc:'Use stairs or a sturdy box to build unilateral leg strength and cardio endurance.',steps:['Stand in front of step, stair, or sturdy box','Step up with right foot, fully extending the leg','Bring left foot up to join','Step down with right foot, then left','Alternate leading foot or complete reps before switching'],cat:['cardio','strength']},
   // YOGA / FLEXIBILITY  
-  {id:'downdog',name:'Downward Dog',icon:'🐕',muscle:'back',secondary:'hamstrings, calves',wiki:'Downward dog',desc:'Foundational yoga pose that stretches posterior chain and builds shoulder strength.',steps:['Start on hands and knees, wrists under shoulders','Tuck toes under and lift hips toward ceiling','Form inverted V shape — press hips high','Keep arms straight, try to straighten legs','Pedal heels alternately to deepen the stretch'],cat:['yoga','stretch']},
-  {id:'warrior1',name:'Warrior I',icon:'⚔️',muscle:'legs',secondary:'shoulders, stretch',wiki:'Warrior pose',desc:'Powerful standing pose building leg strength and hip flexor flexibility simultaneously.',steps:['Step right foot forward into lunge position','Spin left foot to 45°, flatten heel to floor','Bend front knee to 90° — thigh parallel','Raise arms overhead reaching toward ceiling','Square hips forward as much as possible, breathe deeply'],cat:['yoga']},
-  {id:'childpose',name:"Child's Pose",icon:'🙇',muscle:'back',secondary:'hips, stretch',wiki:"Child's pose",desc:'Restorative resting pose that gently stretches lower back, hips, and shoulders.',steps:['Kneel with big toes together, sit back on heels','Spread knees mat-width apart','Walk hands forward on floor, lowering chest','Arms extended forward or resting at sides','Breathe deeply, relaxing with each exhale'],cat:['yoga','stretch']},
-  {id:'cobrapush',name:'Cobra Stretch',icon:'🐍',muscle:'back',secondary:'abs, chest',wiki:'Cobra pose',desc:'Spinal extension that counteracts sitting posture and relieves lower back tension.',steps:['Lie face down, hands under shoulders','Press into palms, lifting chest and head','Elbows may stay bent — don\'t overextend','Gaze forward and slightly up','Hold 30 seconds, breathing into the stretch'],cat:['yoga','stretch','beginner']},
+  {id:'downdog',name:'Downward Dog',icon:'🐕',muscle:'back',secondary:'hamstrings, calves',desc:'Foundational yoga pose that stretches posterior chain and builds shoulder strength.',steps:['Start on hands and knees, wrists under shoulders','Tuck toes under and lift hips toward ceiling','Form inverted V shape — press hips high','Keep arms straight, try to straighten legs','Pedal heels alternately to deepen the stretch'],cat:['yoga','stretch']},
+  {id:'warrior1',name:'Warrior I',icon:'⚔️',muscle:'legs',secondary:'shoulders, stretch',desc:'Powerful standing pose building leg strength and hip flexor flexibility simultaneously.',steps:['Step right foot forward into lunge position','Spin left foot to 45°, flatten heel to floor','Bend front knee to 90° — thigh parallel','Raise arms overhead reaching toward ceiling','Square hips forward as much as possible, breathe deeply'],cat:['yoga']},
+  {id:'childpose',name:"Child's Pose",icon:'🙇',muscle:'back',secondary:'hips, stretch',desc:'Restorative resting pose that gently stretches lower back, hips, and shoulders.',steps:['Kneel with big toes together, sit back on heels','Spread knees mat-width apart','Walk hands forward on floor, lowering chest','Arms extended forward or resting at sides','Breathe deeply, relaxing with each exhale'],cat:['yoga','stretch']},
+  {id:'cobrapush',name:'Cobra Stretch',icon:'🐍',muscle:'back',secondary:'abs, chest',desc:'A gentle spinal extension, a good counter-movement after sitting for long periods.',steps:['Lie face down, hands under shoulders','Press into palms, lifting chest and head','Elbows may stay bent — don\'t overextend','Gaze forward and slightly up','Hold 30 seconds, breathing into the stretch'],cat:['yoga','stretch','beginner']},
   // STRETCH
-  {id:'hipflexor',name:'Hip Flexor Stretch',icon:'🦴',muscle:'legs',secondary:'stretch, mobility',wiki:'Hip flexor',desc:'Essential stretch for anyone who sits. Opens up tight hip flexors and relieves lower back pain.',steps:['Kneel on right knee, left foot forward','Shift weight forward until right hip stretches','Keep torso upright, core engaged','For deeper stretch, reach right arm overhead','Hold 30-60 seconds each side'],cat:['stretch']},
-  {id:'pigeonpose',name:'Pigeon Pose',icon:'🕊️',muscle:'glutes',secondary:'hips, stretch',wiki:'Pigeon pose',desc:'Deep hip opener that releases piriformis and IT band tension. Essential recovery stretch.',steps:['From downward dog, bring right knee toward right wrist','Angle foot toward left wrist or keep perpendicular','Lower left leg straight behind you on floor','Walk hands forward, lowering chest if able','Hold 1-3 minutes each side — breathe deeply'],cat:['yoga','stretch']},
+  {id:'hipflexor',name:'Hip Flexor Stretch',icon:'🦴',muscle:'legs',secondary:'stretch, mobility',desc:'A useful stretch for anyone who sits a lot. Opens up tight hip flexors.',steps:['Kneel on right knee, left foot forward','Shift weight forward until right hip stretches','Keep torso upright, core engaged','For deeper stretch, reach right arm overhead','Hold 30-60 seconds each side'],cat:['stretch']},
+  {id:'pigeonpose',name:'Pigeon Pose',icon:'🕊️',muscle:'glutes',secondary:'hips, stretch',desc:'Deep hip opener that releases piriformis and IT band tension. Essential recovery stretch.',steps:['From downward dog, bring right knee toward right wrist','Angle foot toward left wrist or keep perpendicular','Lower left leg straight behind you on floor','Walk hands forward, lowering chest if able','Hold 1-3 minutes each side — breathe deeply'],cat:['yoga','stretch']},
 
-  // ── FROM HINGE HEALTH & HEALTHLINE ──────────────────────────────
-  {id:'sidelunge',name:'Side Lunge',icon:'↔️',muscle:'legs',secondary:'glutes, adductors',wiki:'Lunge (exercise)',desc:'A lateral lunge that targets your inner thighs, glutes, and quads — great for hip mobility and stability (Hinge Health).',steps:['Stand tall with feet together, hands clasped at chest','Take a wide step out to the right, keeping left leg straight','Bend right knee, pushing hips back and down — keep right foot flat','Feel the stretch in left inner thigh; knee should track over right toes','Push through right heel to return to start, then repeat on left side'],cat:['beginner','strength']},
+  // ── BEGINNER & MOBILITY EXERCISES ──────────────────────────────
+  {id:'sidelunge',name:'Side Lunge',icon:'↔️',muscle:'legs',secondary:'glutes, adductors',desc:'A lateral lunge that targets your inner thighs, glutes, and quads — great for hip mobility and stability.',steps:['Stand tall with feet together, hands clasped at chest','Take a wide step out to the right, keeping left leg straight','Bend right knee, pushing hips back and down — keep right foot flat','Feel the stretch in left inner thigh; knee should track over right toes','Push through right heel to return to start, then repeat on left side'],cat:['beginner','strength']},
 
-  {id:'kneepushup',name:'Knee Push-Up',icon:'🧎',muscle:'chest',secondary:'shoulders, triceps',wiki:'Push-up',desc:'A beginner-friendly push-up variation recommended by Hinge Health physios. Reduces load while building chest and arm strength.',steps:['Start on hands and knees, wrists under shoulders','Walk hands forward so body forms a diagonal line from knees to head','Lower chest toward floor, keeping elbows at 45°','Stop just before chest touches floor','Press back up — keep core tight even from knees'],cat:['beginner']},
+  {id:'kneepushup',name:'Knee Push-Up',icon:'🧎',muscle:'chest',secondary:'shoulders, triceps',desc:'A beginner-friendly push-up variation. Reduces load while building chest and arm strength.',steps:['Start on hands and knees, wrists under shoulders','Walk hands forward so body forms a diagonal line from knees to head','Lower chest toward floor, keeping elbows at 45°','Stop just before chest touches floor','Press back up — keep core tight even from knees'],cat:['beginner']},
 
-  {id:'tricdip',name:'Chair Dips',icon:'🪑',muscle:'arms',secondary:'chest, shoulders',wiki:'Dip (exercise)',desc:'Use any sturdy chair or couch edge to target triceps. Featured in Healthline\'s weekly starter circuit.',steps:['Sit on edge of a sturdy chair, hands gripping the seat beside your hips','Slide hips off the chair, supporting weight on your hands','Bend elbows straight back to 90°, lowering your body','Keep back close to the chair — don\'t flare elbows out wide','Press through palms to straighten arms back to start'],cat:['beginner','strength']},
+  {id:'tricdip',name:'Chair Dips',icon:'🪑',muscle:'arms',secondary:'chest, shoulders',desc:'Use any sturdy chair or couch edge to target triceps.',steps:['Sit on edge of a sturdy chair, hands gripping the seat beside your hips','Slide hips off the chair, supporting weight on your hands','Bend elbows straight back to 90°, lowering your body','Keep back close to the chair — don\'t flare elbows out wide','Press through palms to straighten arms back to start'],cat:['beginner','strength']},
 
-  {id:'situp',name:'Sit-Ups',icon:'🌀',muscle:'core',secondary:'hip flexors',wiki:'Sit-up',desc:'Classic full-range core movement from Healthline\'s weekly circuit. Stronger range of motion than a crunch.',steps:['Lie flat on back, knees bent at 90°, feet flat on floor','Cross arms over chest or place fingertips lightly behind ears','Engage your abs and curl all the way up, bringing chest to knees','Avoid pulling on your neck — the power comes from your abs','Slowly lower back down vertebra by vertebra'],cat:['beginner','core']},
+  {id:'situp',name:'Sit-Ups',icon:'🌀',muscle:'core',secondary:'hip flexors',desc:'Classic full-range core movement. Stronger range of motion than a crunch.',steps:['Lie flat on back, knees bent at 90°, feet flat on floor','Cross arms over chest or place fingertips lightly behind ears','Engage your abs and curl all the way up, bringing chest to knees','Avoid pulling on your neck — the power comes from your abs','Slowly lower back down vertebra by vertebra'],cat:['beginner','core']},
 
-  {id:'firehydrant',name:'Fire Hydrant',icon:'🚒',muscle:'glutes',secondary:'hips, core',wiki:'Fire hydrant exercise',desc:'A Hinge Health-recommended glute isolation move. Opens hips and activates the gluteus medius for better knee and back health.',steps:['Start on all fours — hands under shoulders, knees under hips','Brace your core so your back stays flat and neutral','Keeping knee bent at 90°, lift one leg out to the side like a dog at a fire hydrant','Raise until thigh is parallel to floor — stop before rotating pelvis','Lower with control, complete all reps then switch sides'],cat:['beginner','glutes']},
+  {id:'firehydrant',name:'Fire Hydrant',icon:'🚒',muscle:'glutes',secondary:'hips, core',desc:'A glute isolation move. Opens the hips and activates the gluteus medius, a key hip stabiliser.',steps:['Start on all fours — hands under shoulders, knees under hips','Brace your core so your back stays flat and neutral','Keeping knee bent at 90°, lift one leg out to the side like a dog at a fire hydrant','Raise until thigh is parallel to floor — stop before rotating pelvis','Lower with control, complete all reps then switch sides'],cat:['beginner','glutes']},
 
-  {id:'downdogtoplank',name:'Downward Dog to Plank',icon:'🔀',muscle:'back',secondary:'core, shoulders, chest',wiki:'Downward dog',desc:'A flowing compound movement from Hinge Health combining two foundational poses for a full-body warm-up and strength builder.',steps:['Start in downward dog — hips high, inverted V shape, pedal heels','Inhale and shift body forward into a high plank — wrists under shoulders','Hold plank for 2 seconds, core tight, body in straight line','Push hips back up to downward dog on the exhale','Flow between the two positions in a controlled, breath-led rhythm'],cat:['yoga','strength','beginner']},
+  {id:'downdogtoplank',name:'Downward Dog to Plank',icon:'🔀',muscle:'back',secondary:'core, shoulders, chest',desc:'A flowing compound movement combining two foundational poses for a full-body warm-up and strength builder.',steps:['Start in downward dog — hips high, inverted V shape, pedal heels','Inhale and shift body forward into a high plank — wrists under shoulders','Hold plank for 2 seconds, core tight, body in straight line','Push hips back up to downward dog on the exhale','Flow between the two positions in a controlled, breath-led rhythm'],cat:['yoga','strength','beginner']},
 
-  {id:'sidestarplank',name:'Side Star Plank',icon:'⭐',muscle:'core',secondary:'obliques, glutes, shoulders',wiki:'Side plank',desc:'An advanced side plank variation from Hinge Health. Stacks full lateral stability and glute strength in one move.',steps:['Begin in a standard side plank — forearm on floor, body in straight line','Once stable, raise your top arm toward ceiling and top leg toward ceiling','Hold this "star" position with 4 points extended — breathe steadily','Focus on keeping hips lifted; don\'t let them sag toward floor','Lower leg and arm, hold standard side plank briefly, then switch sides'],cat:['core','strength']},
+  {id:'sidestarplank',name:'Side Star Plank',icon:'⭐',muscle:'core',secondary:'obliques, glutes, shoulders',desc:'An advanced side plank variation. Stacks full lateral stability and glute strength in one move.',steps:['Begin in a standard side plank — forearm on floor, body in straight line','Once stable, raise your top arm toward ceiling and top leg toward ceiling','Hold this "star" position with 4 points extended — breathe steadily','Focus on keeping hips lifted; don\'t let them sag toward floor','Lower leg and arm, hold standard side plank briefly, then switch sides'],cat:['core','strength']},
 
-  {id:'briskhike',name:'Brisk Walk / Jog',icon:'🚶‍♂️',muscle:'legs',secondary:'cardio, core',wiki:'Walking',desc:'Healthline\'s go-to cardio recommendation for beginner weekly programs. Sustainable, joint-friendly and proven to boost mood.',steps:['Start at a comfortable walking pace to warm up for 2–3 minutes','Gradually increase pace until you are breathing harder but can still speak','Pump arms in opposition to legs — this engages your core and boosts speed','Aim for a "conversational" intensity — challenging but sustainable','Cool down with 3–5 minutes of slower walking at the end'],cat:['beginner','cardio']},
+  {id:'briskhike',name:'Brisk Walk / Jog',icon:'🚶‍♂️',muscle:'legs',secondary:'cardio, core',desc:'An easy cardio choice for beginner weekly programs. Sustainable and joint-friendly.',steps:['Start at a comfortable walking pace to warm up for 2–3 minutes','Gradually increase pace until you are breathing harder but can still speak','Pump arms in opposition to legs — this engages your core and boosts speed','Aim for a "conversational" intensity — challenging but sustainable','Cool down with 3–5 minutes of slower walking at the end'],cat:['beginner','cardio']},
 
-  {id:'standingtwist',name:'Standing Torso Twist',icon:'🌪️',muscle:'core',secondary:'obliques, back',wiki:'Torso rotation exercise',desc:'Rotational warm-up and core activator recommended by Healthline for beginners. No equipment, standing only.',steps:['Stand with feet shoulder-width apart, knees slightly soft','Extend arms to shoulder height or cross them over chest','Rotate torso to the right as far as comfortable, keeping hips square','Hold for a breath, then rotate to the left — that\'s one rep','Start slow; increase range as body warms up'],cat:['beginner','stretch','core']},
+  {id:'standingtwist',name:'Standing Torso Twist',icon:'🌪️',muscle:'core',secondary:'obliques, back',desc:'Rotational warm-up and core activator for beginners. No equipment, standing only.',steps:['Stand with feet shoulder-width apart, knees slightly soft','Extend arms to shoulder height or cross them over chest','Rotate torso to the right as far as comfortable, keeping hips square','Hold for a breath, then rotate to the left — that\'s one rep','Start slow; increase range as body warms up'],cat:['beginner','stretch','core']},
 
-  // ── NEW EXERCISES INSPIRED BY TOP YOUTUBE CHANNELS ──────────────────
-  {id:'inchworm',name:'Inchworm',icon:'🐛',muscle:'back',secondary:'core, hamstrings, shoulders',wiki:'Inchworm exercise',desc:'A full-body warm-up staple from Athlean-X and MadFit. Tests hamstring flexibility, shoulder stability and core control in one flowing move.',steps:['Stand tall with feet hip-width apart','Hinge at hips and place hands on floor in front of feet','Walk hands forward until you reach a high plank position','Pause — body in straight line, core braced','Walk feet toward hands keeping legs as straight as possible, then stand and repeat'],cat:['beginner','strength','cardio']},
+  // ── MORE EXERCISES ──────────────────
+  {id:'inchworm',name:'Inchworm',icon:'🐛',muscle:'back',secondary:'core, hamstrings, shoulders',desc:'A full-body warm-up staple. Tests hamstring flexibility, shoulder stability and core control in one flowing move.',steps:['Stand tall with feet hip-width apart','Hinge at hips and place hands on floor in front of feet','Walk hands forward until you reach a high plank position','Pause — body in straight line, core braced','Walk feet toward hands keeping legs as straight as possible, then stand and repeat'],cat:['beginner','strength','cardio']},
 
-  {id:'reverselunge',name:'Reverse Lunge',icon:'↩️',muscle:'legs',secondary:'glutes, core',wiki:'Lunge (exercise)',desc:'Stepping back instead of forward reduces knee strain and better isolates the glute. A go-to in science-based YouTube routines for balanced leg development.',steps:['Stand tall with feet together, hands on hips or at chest','Step one foot directly backward — long stride, controlled','Lower your back knee toward the floor without touching it','Front thigh parallel to floor, knee tracking over toes','Drive through the front heel to return — switch legs each rep'],cat:['beginner','strength']},
+  {id:'reverselunge',name:'Reverse Lunge',icon:'↩️',muscle:'legs',secondary:'glutes, core',desc:'Stepping back instead of forward is easier on the knees and better isolates the glute. A go-to move for balanced leg development.',steps:['Stand tall with feet together, hands on hips or at chest','Step one foot directly backward — long stride, controlled','Lower your back knee toward the floor without touching it','Front thigh parallel to floor, knee tracking over toes','Drive through the front heel to return — switch legs each rep'],cat:['beginner','strength']},
 
-  {id:'bulgariansplit',name:'Bulgarian Split Squat',icon:'🏋️',muscle:'legs',secondary:'glutes, core',wiki:'Bulgarian split squat',desc:'Single-leg powerhouse exercise featured in Athlean-X\'s home workout plan. Builds quad and glute strength while improving balance and fixing imbalances.',steps:['Find a couch, chair or step behind you','Place your rear foot up on it, laces down, and hop the front foot forward','Lower straight down — back knee drops toward floor','Front shin stays close to vertical; feel the stretch in the rear hip','Drive through front heel to stand — complete all reps, then switch legs'],cat:['strength']},
+  {id:'bulgariansplit',name:'Bulgarian Split Squat',icon:'🏋️',muscle:'legs',secondary:'glutes, core',desc:'Single-leg powerhouse exercise. Builds quad and glute strength while improving balance and evening out left-right differences.',steps:['Find a couch, chair or step behind you','Place your rear foot up on it, laces down, and hop the front foot forward','Lower straight down — back knee drops toward floor','Front shin stays close to vertical; feel the stretch in the rear hip','Drive through front heel to stand — complete all reps, then switch legs'],cat:['strength']},
 
-  {id:'hollowhold',name:'Hollow Body Hold',icon:'🍌',muscle:'core',secondary:'hip flexors, shoulders',wiki:'Hollow body hold',desc:'A gymnastics-foundation core exercise made popular by Athlean-X. Builds anti-extension core strength for a bulletproof midsection.',steps:['Lie on your back, arms extended overhead, legs straight','Press your lower back firmly into the floor — this is the key','Lift shoulder blades and legs simultaneously off the floor','Hold the "banana" shape — your lower back stays glued to the floor','Breathe steadily; if form breaks, raise legs higher until it holds'],cat:['core','strength']},
+  {id:'hollowhold',name:'Hollow Body Hold',icon:'🍌',muscle:'core',secondary:'hip flexors, shoulders',desc:'A gymnastics-foundation core exercise. Builds anti-extension core strength for a strong, stable midsection.',steps:['Lie on your back, arms extended overhead, legs straight','Press your lower back firmly into the floor — this is the key','Lift shoulder blades and legs simultaneously off the floor','Hold the "banana" shape — your lower back stays glued to the floor','Breathe steadily; if form breaks, raise legs higher until it holds'],cat:['core','strength']},
 
-  {id:'vup',name:'V-Ups',icon:'✌️',muscle:'core',secondary:'hip flexors',wiki:'V-up (exercise)',desc:'Advanced full-range core movement — both upper and lower body meet at the top. Popular in MadFit and Chloe Ting core workouts.',steps:['Lie flat on your back, arms extended overhead, legs straight','In one motion, lift both legs and your torso simultaneously','Reach hands toward your feet — body forms a V at the top','Control the lowering phase — don\'t let your back arch','For easier version, bend knees to meet a crunching upper body'],cat:['core']},
+  {id:'vup',name:'V-Ups',icon:'✌️',muscle:'core',secondary:'hip flexors',desc:'Advanced full-range core movement — both upper and lower body meet at the top.',steps:['Lie flat on your back, arms extended overhead, legs straight','In one motion, lift both legs and your torso simultaneously','Reach hands toward your feet — body forms a V at the top','Control the lowering phase — don\'t let your back arch','For easier version, bend knees to meet a crunching upper body'],cat:['core']},
 
-  {id:'spidermanplank',name:'Spiderman Plank',icon:'🕷️',muscle:'core',secondary:'obliques, hip flexors',wiki:'Plank (exercise)',desc:'A dynamic plank variation from popular YouTube trainers that adds hip flexor mobility and rotational core work to the classic hold.',steps:['Start in a high plank position, wrists under shoulders','Keeping your right foot off the floor, bring right knee to right elbow','Pause at the top, then return the foot to plank position','Repeat on the left side — alternate with control','Keep hips level and core braced — don\'t let them rotate or sag'],cat:['core','strength']},
+  {id:'spidermanplank',name:'Spiderman Plank',icon:'🕷️',muscle:'core',secondary:'obliques, hip flexors',desc:'A dynamic plank variation that adds hip flexor mobility and rotational core work to the classic hold.',steps:['Start in a high plank position, wrists under shoulders','Keeping your right foot off the floor, bring right knee to right elbow','Pause at the top, then return the foot to plank position','Repeat on the left side — alternate with control','Keep hips level and core braced — don\'t let them rotate or sag'],cat:['core','strength']},
 
-  {id:'tpushup',name:'T Push-Up',icon:'✝️',muscle:'chest',secondary:'shoulders, core, obliques',wiki:'Push-up variations',desc:'A push-up with a rotation at the top — targets chest AND obliques in one rep. A favourite in science-based full-body YouTube circuits.',steps:['Start in a standard push-up position','Lower chest to floor with control','As you push back up, rotate your body and raise your right arm toward ceiling','Balance on your left hand and the edges of your feet — form a T shape','Return to push-up, perform next rep and rotate to the left'],cat:['strength','core']},
+  {id:'tpushup',name:'T Push-Up',icon:'✝️',muscle:'chest',secondary:'shoulders, core, obliques',desc:'A push-up with a rotation at the top — targets chest AND obliques in one rep.',steps:['Start in a standard push-up position','Lower chest to floor with control','As you push back up, rotate your body and raise your right arm toward ceiling','Balance on your left hand and the edges of your feet — form a T shape','Return to push-up, perform next rep and rotate to the left'],cat:['strength','core']},
 
-  {id:'bearcrawl',name:'Bear Crawl',icon:'🐻',muscle:'core',secondary:'shoulders, legs, cardio',wiki:'Bear crawl exercise',desc:'A primal movement pattern used in athletic training, popularized by Athlean-X. Builds full-body coordination, core stability, and shoulder endurance.',steps:['Start on all fours — knees hovering just 2-3 inches off the floor','Keep your back flat and core braced — don\'t let hips rise or sag','Move your right hand and left foot forward simultaneously','Then left hand and right foot — crawl forward 5 steps','Reverse direction and crawl back — that\'s one rep'],cat:['cardio','strength','hiit']},
+  {id:'bearcrawl',name:'Bear Crawl',icon:'🐻',muscle:'core',secondary:'shoulders, legs, cardio',desc:'A primal movement pattern used in athletic training. Builds full-body coordination, core stability, and shoulder endurance.',steps:['Start on all fours — knees hovering just 2-3 inches off the floor','Keep your back flat and core braced — don\'t let hips rise or sag','Move your right hand and left foot forward simultaneously','Then left hand and right foot — crawl forward 5 steps','Reverse direction and crawl back — that\'s one rep'],cat:['cardio','strength','hiit']},
 
-  {id:'shadowbox',name:'Shadow Boxing',icon:'🥊',muscle:'shoulders',secondary:'cardio, core, arms',wiki:'Shadow boxing',desc:'Explosive upper-body cardio move popular in MadFit and PopSugar workouts. Burns high calories, improves coordination, and relieves stress.',steps:['Stand in a split stance — left foot forward for right-handed (opposite for lefty)','Keep knees slightly bent, weight on balls of feet — stay light and bouncy','Throw a jab (straight punch) with your lead hand — snap it back fast','Cross with your rear hand — rotate your torso into the punch','Combine jab-cross combos; add hooks and uppercuts as confidence grows'],cat:['cardio','hiit']},
+  {id:'shadowbox',name:'Shadow Boxing',icon:'🥊',muscle:'shoulders',secondary:'cardio, core, arms',desc:'Explosive upper-body cardio move. Gets the heart rate up and improves coordination.',steps:['Stand in a split stance — left foot forward for right-handed (opposite for lefty)','Keep knees slightly bent, weight on balls of feet — stay light and bouncy','Throw a jab (straight punch) with your lead hand — snap it back fast','Cross with your rear hand — rotate your torso into the punch','Combine jab-cross combos; add hooks and uppercuts as confidence grows'],cat:['cardio','hiit']},
 
-  {id:'reverseplank',name:'Reverse Plank',icon:'🌉',muscle:'back',secondary:'glutes, hamstrings, core',wiki:'Reverse plank',desc:'The opposite of a standard plank — opens the chest and targets the posterior chain. Featured in Blogilates and flexibility-focused YouTube routines.',steps:['Sit on the floor with legs extended, hands on the floor behind hips','Fingers pointing forward or slightly outward for wrist comfort','Press through palms and heels to lift hips and torso off the floor','Body forms a straight diagonal line from head to heels','Pull shoulder blades together and hold — breathe steadily'],cat:['strength','stretch']},
+  {id:'reverseplank',name:'Reverse Plank',icon:'🌉',muscle:'back',secondary:'glutes, hamstrings, core',desc:'The opposite of a standard plank — opens the chest and targets the posterior chain.',steps:['Sit on the floor with legs extended, hands on the floor behind hips','Fingers pointing forward or slightly outward for wrist comfort','Press through palms and heels to lift hips and torso off the floor','Body forms a straight diagonal line from head to heels','Pull shoulder blades together and hold — breathe steadily'],cat:['strength','stretch']},
 
-  {id:'jumplunge',name:'Jump Lunges',icon:'⚡',muscle:'legs',secondary:'glutes, cardio',wiki:'Lunge (exercise)',desc:'Explosive plyometric lunge popular in Chloe Ting and HIIT YouTube workouts. Spikes heart rate and builds powerful, fast-twitch leg muscles.',steps:['Start in a lunge position — right foot forward, left foot back','Lower until back knee nearly touches floor','Explosively jump upward, switching leg positions mid-air','Land in a lunge with left foot now forward — absorb impact softly','Land with bent knees to protect joints — maintain rhythm'],cat:['hiit','cardio','strength']},
+  {id:'jumplunge',name:'Jump Lunges',icon:'⚡',muscle:'legs',secondary:'glutes, cardio',desc:'Explosive plyometric lunge popular in HIIT workouts. Spikes heart rate and builds powerful, fast-twitch leg muscles.',steps:['Start in a lunge position — right foot forward, left foot back','Lower until back knee nearly touches floor','Explosively jump upward, switching leg positions mid-air','Land in a lunge with left foot now forward — absorb impact softly','Land with bent knees to protect joints — maintain rhythm'],cat:['hiit','cardio','strength']},
 
-  {id:'toetouch',name:'Standing Toe Touches',icon:'🖐️',muscle:'core',secondary:'hamstrings, obliques',wiki:'Toe touch exercise',desc:'Standing crossover toe touch — works obliques and hamstrings simultaneously. Popular in MadFit and standing abs YouTube routines, no floor needed.',steps:['Stand with feet slightly wider than shoulder-width, arms out to sides','Keep legs straight (soft knees okay) and core braced','Hinge forward and rotate to touch your right foot with your left hand','Return to starting position, then touch left foot with right hand','Alternate sides with a controlled, rhythmic motion'],cat:['core','beginner']},
+  {id:'toetouch',name:'Standing Toe Touches',icon:'🖐️',muscle:'core',secondary:'hamstrings, obliques',desc:'Standing crossover toe touch — works obliques and hamstrings simultaneously. No floor needed.',steps:['Stand with feet slightly wider than shoulder-width, arms out to sides','Keep legs straight (soft knees okay) and core braced','Hinge forward and rotate to touch your right foot with your left hand','Return to starting position, then touch left foot with right hand','Alternate sides with a controlled, rhythmic motion'],cat:['core','beginner']},
 
-  {id:'hipabduction',name:'Standing Hip Abduction',icon:'🦿',muscle:'glutes',secondary:'hip stabilisers',wiki:'Hip abduction exercise',desc:'Standing lateral leg raise that targets the gluteus medius for hip stability. Seen in rehabilitation and YouTube pilates-style routines. Zero equipment.',steps:['Stand tall, hold a wall or chair for balance if needed','Shift weight onto your left leg, keeping it slightly soft','Lift right leg out to the side — lead with heel, keep foot flexed','Raise to about 45° — feel the outer glute working','Lower with control; don\'t let the hip drop or lean — complete reps then switch'],cat:['beginner','glutes']},
+  {id:'hipabduction',name:'Standing Hip Abduction',icon:'🦿',muscle:'glutes',secondary:'hip stabilisers',desc:'Standing lateral leg raise that targets the gluteus medius for hip stability. A pilates-style move. Zero equipment.',steps:['Stand tall, hold a wall or chair for balance if needed','Shift weight onto your left leg, keeping it slightly soft','Lift right leg out to the side — lead with heel, keep foot flexed','Raise to about 45° — feel the outer glute working','Lower with control; don\'t let the hip drop or lean — complete reps then switch'],cat:['beginner','glutes']},
 
   // ── ISOMETRIC HOLDS ──────────────────────────────────────────────────
-  {id:'isosquat',name:'Isometric Squat Hold',icon:'🪑',muscle:'legs',secondary:'glutes, core',wiki:'Wall sit',desc:'Hold the bottom of a squat position with no wall support. Builds raw quad strength, mental toughness, and joint stability under load.',steps:['Stand with feet shoulder-width apart, toes slightly out','Lower into a squat until thighs are parallel to the floor','Hold this exact position — do not bounce or shift weight','Arms extended forward or hands clasped at chest for balance','Breathe slowly and steadily; squeeze quads hard the entire hold'],cat:['strength','beginner']},
+  {id:'isosquat',name:'Isometric Squat Hold',icon:'🪑',muscle:'legs',secondary:'glutes, core',desc:'Hold the bottom of a squat position with no wall support. Builds raw quad strength, mental toughness, and joint stability under load.',steps:['Stand with feet shoulder-width apart, toes slightly out','Lower into a squat until thighs are parallel to the floor','Hold this exact position — do not bounce or shift weight','Arms extended forward or hands clasped at chest for balance','Breathe slowly and steadily; squeeze quads hard the entire hold'],cat:['strength','beginner']},
 
-  {id:'isopushup',name:'Push-Up Bottom Hold',icon:'📌',muscle:'chest',secondary:'shoulders, triceps, core',wiki:'Push-up',desc:'A foundational hold and a test of upper-body strength: freeze at the bottom of a push-up and push hard against the floor. Builds raw pressing strength in the chest, shoulders and triceps.',steps:['Lower into the bottom of a push-up with your body in one straight line from head to heels','Stop when your chest is 2–3 cm above the floor — do not rest on it','Elbows at 45° from your body, core fully braced','Hold this position — feel your chest, shoulders and triceps firing','Push hard into the floor and hold for 20–30 seconds at about 70% effort, breathing steadily — hold higher up (mid-range) or drop to your knees if your body line breaks'],cat:['strength']},
+  {id:'isopushup',name:'Push-Up Bottom Hold',icon:'📌',muscle:'chest',secondary:'shoulders, triceps, core',desc:'A foundational hold and a test of upper-body strength: freeze at the bottom of a push-up and push hard against the floor. Builds raw pressing strength in the chest, shoulders and triceps.',steps:['Lower into the bottom of a push-up with your body in one straight line from head to heels','Stop when your chest is 2–3 cm above the floor — do not rest on it','Elbows at 45° from your body, core fully braced','Hold this position — feel your chest, shoulders and triceps firing','Push hard into the floor and hold for 20–30 seconds at about 70% effort, breathing steadily — hold higher up (mid-range) or drop to your knees if your body line breaks'],cat:['strength']},
 
-  {id:'isolunge',name:'Deep Split Squat Hold',icon:'🧎',muscle:'legs',secondary:'glutes, core, balance',wiki:'Lunge (exercise)',desc:'Hold the bottom of a split squat, where most people are weakest. Builds single-leg strength, quad endurance and hip stability.',steps:['Take a long split stance with your right foot well forward and your left heel lifted','Lower straight down until your back knee hovers just above the floor and your front thigh is about parallel','Keep your torso tall, your front knee over your toes and most of your weight on your front heel','Squeeze both legs and hold still for 20–30 seconds, breathing steadily','Stand up and repeat on the other leg'],cat:['strength','beginner']},
+  {id:'isolunge',name:'Deep Split Squat Hold',icon:'🧎',muscle:'legs',secondary:'glutes, core, balance',desc:'Hold the bottom of a split squat, where most people are weakest. Builds single-leg strength, quad endurance and hip stability.',steps:['Take a long split stance with your right foot well forward and your left heel lifted','Lower straight down until your back knee hovers just above the floor and your front thigh is about parallel','Keep your torso tall, your front knee over your toes and most of your weight on your front heel','Squeeze both legs and hold still for 20–30 seconds, breathing steadily','Stand up and repeat on the other leg'],cat:['strength','beginner']},
 
-  {id:'lsithold',name:'L-Sit Hold',icon:'🪑',muscle:'core',secondary:'hip flexors, triceps, shoulders',wiki:'L-sit',desc:'A challenging hold on two sturdy chairs (or the floor) that trains your triceps and hip flexors at the same time. No rings needed.',steps:['Sit on floor or place hands on two low chairs beside your hips','Press firmly through palms, straighten arms and lift hips off ground','Extend legs straight in front — body forms an "L" shape','Legs parallel to floor; point toes for added tension','Hold position; if full L-sit is too hard, tuck one or both knees first'],cat:['core','strength']},
+  {id:'lsithold',name:'L-Sit Hold',icon:'🪑',muscle:'core',secondary:'hip flexors, triceps, shoulders',desc:'A challenging hold on two sturdy chairs (or the floor) that trains your triceps and hip flexors at the same time. No rings needed.',steps:['Sit on floor or place hands on two low chairs beside your hips','Press firmly through palms, straighten arms and lift hips off ground','Extend legs straight in front — body forms an "L" shape','Legs parallel to floor; point toes for added tension','Hold position; if full L-sit is too hard, tuck one or both knees first'],cat:['core','strength']},
 
-  {id:'deadbughold',name:'Dead Bug Hold',icon:'🐞',muscle:'core',secondary:'deep stabilisers, back',wiki:'Dead bug exercise',desc:'Isometric version of the dead bug — arms and legs extended, lower back pinned to floor. A BarBend-recommended deep core stabiliser with zero spinal flexion.',steps:['Lie on your back, arms reaching straight up toward ceiling','Raise legs to table-top (90° at hips and knees)','Press your lower back firmly into the floor — not a single gap','Now extend your right arm overhead and left leg out simultaneously','Hold — don\'t move, don\'t let the lower back lift; breathe deeply and switch sides'],cat:['core','beginner']},
+  {id:'deadbughold',name:'Dead Bug Hold',icon:'🐞',muscle:'core',secondary:'deep stabilisers, back',desc:'Isometric version of the dead bug — arms and legs extended, lower back pinned to floor. A BarBend-recommended deep core stabiliser with zero spinal flexion.',steps:['Lie on your back, arms reaching straight up toward ceiling','Raise legs to table-top (90° at hips and knees)','Press your lower back firmly into the floor — not a single gap','Now extend your right arm overhead and left leg out simultaneously','Hold — don\'t move, don\'t let the lower back lift; breathe deeply and switch sides'],cat:['core','beginner']},
 
-  {id:'isochest',name:'Isometric Chest Squeeze',icon:'🤲',muscle:'chest',secondary:'shoulders, biceps',wiki:'Isometric exercise',desc:'A self-resistance pressing exercise — no equipment, no floor needed. Bruce Lee used this principle to build exceptional chest strength anywhere.',steps:['Bring hands together in a prayer position at chest height','Press your palms hard against each other — maximum force','Feel the inner chest and front deltoid fire under the tension','Hold the squeeze — breathe normally, don\'t hold your breath','Increase or decrease range by moving clasped hands higher or lower'],cat:['beginner','strength']},
+  {id:'isochest',name:'Isometric Chest Squeeze',icon:'🤲',muscle:'chest',secondary:'shoulders, biceps',desc:'A self-resistance pressing exercise — no equipment, no floor needed. Bruce Lee used this principle to build exceptional chest strength anywhere.',steps:['Bring hands together in a prayer position at chest height','Press your palms hard against each other — maximum force','Feel the inner chest and front deltoid fire under the tension','Hold the squeeze — breathe normally, don\'t hold your breath','Increase or decrease range by moving clasped hands higher or lower'],cat:['beginner','strength']},
 
-  {id:'isorow',name:'Isometric Back Row Hold',icon:'↩️',muscle:'back',secondary:'biceps, rear delts',wiki:'Isometric exercise',desc:'Self-resistance row using one arm pulling against the other. Targets the mid-back and biceps without any equipment or pulling surface.',steps:['Extend your right arm forward, palm up, at waist height','Grip your right wrist with your left hand from above','Pull your right arm back toward your hip like a row — resist hard with your left hand','Left hand provides exactly enough resistance that the right arm barely moves','Hold the tension — squeeze shoulder blade toward spine; switch arms after'],cat:['beginner','strength']},
+  {id:'isorow',name:'Isometric Back Row Hold',icon:'↩️',muscle:'back',secondary:'biceps, rear delts',desc:'Self-resistance row using one arm pulling against the other. Targets the mid-back and biceps without any equipment or pulling surface.',steps:['Extend your right arm forward, palm up, at waist height','Grip your right wrist with your left hand from above','Pull your right arm back toward your hip like a row — resist hard with your left hand','Left hand provides exactly enough resistance that the right arm barely moves','Hold the tension — squeeze shoulder blade toward spine; switch arms after'],cat:['beginner','strength']},
 
-  {id:'marchhold',name:'Single Leg March Hold',icon:'🦩',muscle:'core',secondary:'glutes, hip flexors, balance',wiki:'Single-leg stance',desc:'Drive one knee to hip height and freeze. A standing isometric that builds anti-rotation core stability and single-leg balance from BarBend\'s top isometric list.',steps:['Stand tall with feet hip-width apart, arms at sides or on hips','Shift weight onto your right foot, keeping the knee soft','Drive your left knee up to hip height — thigh parallel to floor','Hold completely still — resist any wobble with your entire core','Breathe steadily; hold for time, then switch legs'],cat:['beginner','core']},
+  {id:'marchhold',name:'Single Leg March Hold',icon:'🦩',muscle:'core',secondary:'glutes, hip flexors, balance',desc:'Drive one knee to hip height and freeze. A standing isometric that builds anti-rotation core stability and single-leg balance from BarBend\'s top isometric list.',steps:['Stand tall with feet hip-width apart, arms at sides or on hips','Shift weight onto your right foot, keeping the knee soft','Drive your left knee up to hip height — thigh parallel to floor','Hold completely still — resist any wobble with your entire core','Breathe steadily; hold for time, then switch legs'],cat:['beginner','core']},
 
-  {id:'wallpush',name:'Wall Push (Overcoming Hold)',icon:'🧱',muscle:'chest',secondary:'shoulders, triceps',wiki:'Isometric exercise',desc:'Push against an immovable wall with maximum intensity for just 3–5 seconds. Overcoming holds build raw nervous-system strength because the wall never gives, so your muscles learn to fire harder.',steps:['Stand about 30 cm from a wall and place both palms flat on it at chest height','Brace your core and lean in slightly, elbows a little bent','Push into the wall as hard as you possibly can — all-out effort, nothing moves','Hold for 3–5 seconds while you keep breathing','Rest 30–60 seconds and repeat for 5 reps'],cat:['beginner','strength']},
+  {id:'wallpush',name:'Wall Push (Overcoming Hold)',icon:'🧱',muscle:'chest',secondary:'shoulders, triceps',desc:'Push against an immovable wall with maximum intensity for just 3–5 seconds. Overcoming holds build raw nervous-system strength because the wall never gives, so your muscles learn to fire harder.',steps:['Stand about 30 cm from a wall and place both palms flat on it at chest height','Brace your core and lean in slightly, elbows a little bent','Push into the wall as hard as you possibly can — all-out effort, nothing moves','Hold for 3–5 seconds while you keep breathing','Rest 30–60 seconds and repeat for 5 reps'],cat:['beginner','strength']},
 
-  {id:'isohamstring',name:'Isometric Hamstring Curl',icon:'🦵',muscle:'legs',secondary:'hamstrings, glutes',wiki:'Hamstring curl',desc:'Self-resistance hamstring curl — one foot pulls back while the other resists. Builds isolated hamstring strength with no equipment or machine needed.',steps:['Stand tall near a wall for light balance support if needed','Cross your right foot behind your left ankle, right foot pressing back against left heel','Press your left heel backward like a leg curl — resist firmly with the right foot','Keep both legs at about 20° of knee bend throughout the hold','Feel the left hamstring fire — hold for time, then switch legs'],cat:['beginner','strength']},
+  {id:'isohamstring',name:'Isometric Hamstring Curl',icon:'🦵',muscle:'legs',secondary:'hamstrings, glutes',desc:'Self-resistance hamstring curl — one foot pulls back while the other resists. Builds isolated hamstring strength with no equipment or machine needed.',steps:['Stand tall near a wall for light balance support if needed','Cross your right foot behind your left ankle, right foot pressing back against left heel','Press your left heel backward like a leg curl — resist firmly with the right foot','Keep both legs at about 20° of knee bend throughout the hold','Feel the left hamstring fire — hold for time, then switch legs'],cat:['beginner','strength']},
 
-  // ── ARATA + THE REP THEORY: HOLDS, HANGS & CARRIES ──────────────────
-  {id:'wallhandstand',name:'Wall Handstand Hold',icon:'🤸',muscle:'shoulders',secondary:'triceps, core, upper back',wiki:'Handstand',desc:'Builds shoulder and arm stability upside down, using a wall for balance. Skip it if you have wrist or shoulder pain.',steps:['Clear the space and start in a push-up position with your heels against the wall and your hands about 30 cm from it','Walk your feet up the wall while stepping your hands closer, until your chest nearly faces the wall and your body is close to vertical','Push the floor away so your shoulders stay shrugged up toward your ears; squeeze your glutes, tuck your ribs in and point your toes','Hold for 20–30 seconds, breathing steadily — come down early if your form breaks or your wrists or shoulders hurt','Walk your feet back down the wall to finish, then shake out your wrists'],cat:['strength']},
+  // ── HOLDS, HANGS & CARRIES ──────────────────
+  {id:'wallhandstand',name:'Wall Handstand Hold',icon:'🤸',muscle:'shoulders',secondary:'triceps, core, upper back',desc:'Builds shoulder and arm stability upside down, using a wall for balance. Skip it if you have wrist or shoulder pain.',steps:['Clear the space and start in a push-up position with your heels against the wall and your hands about 30 cm from it','Walk your feet up the wall while stepping your hands closer, until your chest nearly faces the wall and your body is close to vertical','Push the floor away so your shoulders stay shrugged up toward your ears; squeeze your glutes, tuck your ribs in and point your toes','Hold for 20–30 seconds, breathing steadily — come down early if your form breaks or your wrists or shoulders hurt','Walk your feet back down the wall to finish, then shake out your wrists'],cat:['strength']},
 
-  {id:'towelpull',name:'Towel Pull-Apart (Overcoming Pull)',icon:'🧣',muscle:'back',secondary:'biceps, rear delts, grip',wiki:'Isometric exercise',desc:'An overcoming hold for pulling: your arms fight each other through a taut towel at maximum intensity for only 3–5 seconds, building raw nervous-system strength.',steps:['Hold a sturdy towel taut between both hands at chest height, hands a little wider than shoulder-width','Pull the ends apart as hard as you can, as if trying to rip it in half — nothing should move','Squeeze your shoulder blades together and keep your shoulders down, away from your ears','Give maximum effort for 3–5 seconds while you keep breathing — never hold your breath','Rest 30–60 seconds and repeat for 5 reps'],cat:['strength','beginner']},
+  {id:'towelpull',name:'Towel Pull-Apart (Overcoming Pull)',icon:'🧣',muscle:'back',secondary:'biceps, rear delts, grip',desc:'An overcoming hold for pulling: your arms fight each other through a taut towel at maximum intensity for only 3–5 seconds, building raw nervous-system strength.',steps:['Hold a sturdy towel taut between both hands at chest height, hands a little wider than shoulder-width','Pull the ends apart as hard as you can, as if trying to rip it in half — nothing should move','Squeeze your shoulder blades together and keep your shoulders down, away from your ears','Give maximum effort for 3–5 seconds while you keep breathing — never hold your breath','Rest 30–60 seconds and repeat for 5 reps'],cat:['strength','beginner']},
 
-  {id:'barhang',name:'Bar Hang (Tendon Priming)',icon:'🧗',muscle:'back',secondary:'forearms, shoulders, grip',equip:'Pull-up bar',wiki:'Pull-up (exercise)',desc:'Hanging from a bar primes your tendons for pulling. Work at a moderate-to-high effort and keep your shoulders engaged.',steps:['Check the bar is firmly mounted and can hold your weight, then grip it overhand with hands about shoulder-width apart (use a chair to reach it if needed)','Let your feet leave the floor until your arms are fully straight','Keep your shoulders engaged — gently pull them down away from your ears instead of hanging limp','Hang for 30–45 seconds at a moderate-to-high effort, breathing steadily','Step down with control. If you can comfortably pass 45 seconds, add weight (such as a backpack) instead of hanging longer'],cat:['strength']},
+  {id:'barhang',name:'Bar Hang (Tendon Priming)',icon:'🧗',muscle:'back',secondary:'forearms, shoulders, grip',equip:'Pull-up bar',desc:'Hanging from a bar primes your tendons for pulling. Work at a moderate-to-high effort and keep your shoulders engaged.',steps:['Check the bar is firmly mounted and can hold your weight, then grip it overhand with hands about shoulder-width apart (use a chair to reach it if needed)','Let your feet leave the floor until your arms are fully straight','Keep your shoulders engaged — gently pull them down away from your ears instead of hanging limp','Hang for 30–45 seconds at a moderate-to-high effort, breathing steadily','Step down with control. If you can comfortably pass 45 seconds, add weight (such as a backpack) instead of hanging longer'],cat:['strength']},
 
-  {id:'scappull',name:'Shoulder-Blade Pull Hold',icon:'🦅',muscle:'back',secondary:'lats, lower traps, shoulders',equip:'Pull-up bar',wiki:'Pull-up (exercise)',desc:'The first movement of a pull-up, held still: pull your shoulder blades down and back at the active start position for 5 seconds.',steps:['Hang from the bar with straight arms and an overhand grip','Without bending your elbows, pull your shoulder blades down and back so your chest lifts slightly — this is the active start of a pull-up','Hold that position for 5 seconds, squeezing hard','Relax back to a full hang, breathe, and repeat','Complete 5 sets of 5-second holds'],cat:['strength']},
+  {id:'scappull',name:'Shoulder-Blade Pull Hold',icon:'🦅',muscle:'back',secondary:'lats, lower traps, shoulders',equip:'Pull-up bar',desc:'The first movement of a pull-up, held still: pull your shoulder blades down and back at the active start position for 5 seconds.',steps:['Hang from the bar with straight arms and an overhand grip','Without bending your elbows, pull your shoulder blades down and back so your chest lifts slightly — this is the active start of a pull-up','Hold that position for 5 seconds, squeezing hard','Relax back to a full hang, breathe, and repeat','Complete 5 sets of 5-second holds'],cat:['strength']},
 
-  {id:'multiangle',name:'Multi-Angle Pull-Up Holds',icon:'📐',muscle:'back',secondary:'biceps, forearms, shoulders',equip:'Pull-up bar, sturdy chair',wiki:'Pull-up (exercise)',desc:'Isometric holds at three points of the pull-up — top, halfway and near-straight arms — so your tendons and muscles get strong across the whole range.',steps:['Stand on a sturdy chair and take the top position of a pull-up, chin above the bar','Hold the top for 5 seconds, then lower to the halfway point (elbows about 90°) and hold for 5 seconds','Lower to a near-straight-arm position (elbows slightly bent) and hold for 5 seconds','That is one round: top, halfway, near-straight arms. Complete 3 rounds, resting between rounds','If you cannot hold an angle yet, keep one foot on the chair to share the load'],cat:['strength']},
+  {id:'multiangle',name:'Multi-Angle Pull-Up Holds',icon:'📐',muscle:'back',secondary:'biceps, forearms, shoulders',equip:'Pull-up bar, sturdy chair',desc:'Isometric holds at three points of the pull-up — top, halfway and near-straight arms — so your tendons and muscles get strong across the whole range.',steps:['Stand on a sturdy chair and take the top position of a pull-up, chin above the bar','Hold the top for 5 seconds, then lower to the halfway point (elbows about 90°) and hold for 5 seconds','Lower to a near-straight-arm position (elbows slightly bent) and hold for 5 seconds','That is one round: top, halfway, near-straight arms. Complete 3 rounds, resting between rounds','If you cannot hold an angle yet, keep one foot on the chair to share the load'],cat:['strength']},
 
-  {id:'slowneg',name:'Pull-Up with 5-Second Negative',icon:'🐢',muscle:'back',secondary:'biceps, forearms, core',equip:'Pull-up bar',wiki:'Pull-up (exercise)',desc:'Pull up, then lower for a strict 5 seconds. Slow eccentrics tie tendon strength together with muscle growth. Stop each set 1–2 reps short of failure.',steps:['Hang from the bar and pull until your chin is above it — jump or step up from a chair if you cannot pull up yet','Pull your shoulders down, keep your core tight and your legs still','Lower yourself for a strict count of 5 seconds until your arms are straight','Reset and repeat with clean reps, stopping 1–2 reps before you would fail','If you cannot pull up yet, do only the 5-second lowering from the top position'],cat:['strength']},
+  {id:'slowneg',name:'Pull-Up with 5-Second Negative',icon:'🐢',muscle:'back',secondary:'biceps, forearms, core',equip:'Pull-up bar',desc:'Pull up, then lower for a strict 5 seconds. Slow eccentrics tie tendon strength together with muscle growth. Stop each set 1–2 reps short of failure.',steps:['Hang from the bar and pull until your chin is above it — jump or step up from a chair if you cannot pull up yet','Pull your shoulders down, keep your core tight and your legs still','Lower yourself for a strict count of 5 seconds until your arms are straight','Reset and repeat with clean reps, stopping 1–2 reps before you would fail','If you cannot pull up yet, do only the 5-second lowering from the top position'],cat:['strength']},
 
-  {id:'farmerwalk',name:'Farmer Walk',icon:'🧳',muscle:'arms',secondary:'forearms, grip, core, traps',equip:'Heavy bags or water jugs',wiki:"Farmer's walk",desc:'Carry heavy household items to build forearm density, grip and whole-body stability.',steps:['Pick up one heavy item in each hand — full water jugs or heavy shopping bags work well','Stand tall with shoulders back and down and ribs stacked over your hips, gripping the handles hard','Walk with short, controlled steps for about 30 seconds without letting the weights swing or your torso lean','Put the weights down with a straight back, rest about 60 seconds and repeat','Choose a load you can carry with good posture for the whole time, and keep your path clear'],cat:['strength']},
+  {id:'farmerwalk',name:'Farmer Walk',icon:'🧳',muscle:'arms',secondary:'forearms, grip, core, traps',equip:'Heavy bags or water jugs',desc:'Carry heavy household items to build forearm density, grip and whole-body stability.',steps:['Pick up one heavy item in each hand — full water jugs or heavy shopping bags work well','Stand tall with shoulders back and down and ribs stacked over your hips, gripping the handles hard','Walk with short, controlled steps for about 30 seconds without letting the weights swing or your torso lean','Put the weights down with a straight back, rest about 60 seconds and repeat','Choose a load you can carry with good posture for the whole time, and keep your path clear'],cat:['strength']},
 ];
 
 const ROUTINES = [
-  {id:'r1',name:'Morning Ignition',desc:'Wake up your body and prime your metabolism for the day ahead.',cat:'beginner',color:'#e8ff47',duration:'15 min',level:'Beginner',cal:120,exercises:[
+  {id:'r1',name:'Morning Ignition',desc:'Wake up your body and get moving for the day ahead.',cat:'beginner',color:'#e8ff47',duration:'15 min',level:'Beginner',cal:120,exercises:[
     {id:'jumpingjack',sets:1,reps:'30 reps',tip:'Start slow and build your pace'},
     {id:'armcircle',sets:1,reps:'20 each direction',tip:'Full range of motion'},
     {id:'squat',sets:3,reps:'12 reps',tip:'Keep chest tall and proud'},
@@ -990,7 +983,7 @@ const ROUTINES = [
     {id:'plank',sets:3,reps:'20s hold',tip:'Squeeze everything tight'},
     {id:'childpose',sets:1,reps:'60s hold',tip:'Deep breathing, full relaxation'},
   ]},
-  {id:'r2',name:'Full Body HIIT Blast',desc:'High intensity circuit that burns fat and builds conditioning in minimal time.',cat:'hiit',color:'#ff4f5e',duration:'25 min',level:'Intermediate',cal:280,exercises:[
+  {id:'r2',name:'Full Body HIIT Blast',desc:'High-intensity circuit that builds conditioning in minimal time.',cat:'hiit',color:'#ff4f5e',duration:'25 min',level:'Intermediate',cal:280,exercises:[
     {id:'jumpingjack',sets:1,reps:'45s on/15s off',tip:'Pump your arms for more intensity'},
     {id:'burpee',sets:4,reps:'10 reps',tip:'Full range — jump high, push-up low'},
     {id:'highknee',sets:1,reps:'45s on/15s off',tip:'Drive those knees up to hip height'},
@@ -1024,7 +1017,7 @@ const ROUTINES = [
     {id:'singlelegglute',sets:3,reps:'12 each leg',tip:'Full hip extension — feel the burn'},
     {id:'calfrise',sets:4,reps:'25 reps',tip:'Full range, slow lowering'},
   ]},
-  {id:'r6',name:'Glutes & Booty',desc:'Targeted glute activation and sculpting routine for a powerful posterior.',cat:'strength',color:'#a855f7',duration:'25 min',level:'Beginner',cal:180,exercises:[
+  {id:'r6',name:'Glutes & Booty',desc:'Targeted glute activation and strengthening routine.',cat:'strength',color:'#a855f7',duration:'25 min',level:'Beginner',cal:180,exercises:[
     {id:'glmbridge',sets:4,reps:'20 reps',tip:'Drive hips high, hold 2s at top'},
     {id:'singlelegglute',sets:3,reps:'15 each leg',tip:'Keep hips level throughout'},
     {id:'donkeykick',sets:3,reps:'20 each leg',tip:'Lead with heel, squeeze at top'},
@@ -1050,7 +1043,7 @@ const ROUTINES = [
     {id:'cobrapush',sets:2,reps:'30s',tip:'Gentle back care'},
     {id:'childpose',sets:1,reps:'60s',tip:'You crushed it — recover well'},
   ]},
-  {id:'r9',name:'5-Min Desk Stretch',desc:'Quick office/desk relief routine targeting tight hip flexors, neck, and shoulders.',cat:'stretch',color:'#14b8a6',duration:'5 min',level:'All Levels',cal:25,exercises:[
+  {id:'r9',name:'5-Min Desk Stretch',desc:'Quick office/desk stretch routine targeting tight hip flexors, neck, and shoulders.',cat:'stretch',color:'#14b8a6',duration:'5 min',level:'All Levels',cal:25,exercises:[
     {id:'armcircle',sets:1,reps:'30s each direction',tip:'Slow and deliberate circles'},
     {id:'cobrapush',sets:2,reps:'30s hold',tip:'Counter your forward head posture'},
     {id:'hipflexor',sets:1,reps:'45s each side',tip:'You probably need this more than you think'},
@@ -1064,8 +1057,8 @@ const ROUTINES = [
     {id:'jumpingjack',sets:1,reps:'2 min cooldown',tip:'Slow down gradually — cool down matters'},
   ]},
 
-  // ── NEW ROUTINES FROM HINGE HEALTH & HEALTHLINE ───────────────────
-  {id:'r11',name:'Healthline Starter Circuit',desc:'The exact Wednesday strength circuit from Healthline\'s expert-designed 1-week beginner program. PT-approved and science-backed.',cat:'beginner',color:'#22c55e',duration:'35 min',level:'Beginner',cal:160,exercises:[
+  // ── BEGINNER ROUTINES ───────────────────
+  {id:'r11',name:'Starter Strength Circuit',desc:'A simple beginner strength circuit: a brisk walk to warm up, then lunges, push-ups, sit-ups, chair dips, jumping jacks and glute bridges, finished with a standing cool-down.',cat:'beginner',color:'#22c55e',duration:'35 min',level:'Beginner',cal:160,exercises:[
     {id:'briskhike',sets:1,reps:'10 min brisk walk',tip:'Get your heart rate up before lifting — this is your warm-up'},
     {id:'lunge',sets:3,reps:'10 each leg',tip:'Keep chest tall; step far enough that your front knee stays over ankle'},
     {id:'pushup',sets:3,reps:'10 reps',tip:'Go from knees if needed — full range matters more than difficulty'},
@@ -1076,9 +1069,9 @@ const ROUTINES = [
     {id:'standingtwist',sets:1,reps:'60s cool-down',tip:'Breathe out on each rotation — full cool-down stretch'},
   ]},
 
-  {id:'r12',name:'Hinge Health PT Circuit',desc:'Physio-approved 15-exercise routine directly from Hinge Health\'s physical therapists. Designed for joint health and beginner strength.',cat:'beginner',color:'#818cf8',duration:'30 min',level:'Beginner',cal:145,exercises:[
-    {id:'squat',sets:2,reps:'12 reps',tip:'Physio tip: push knees gently outward on the way down'},
-    {id:'glmbridge',sets:2,reps:'12 reps',tip:'Hinge Health favourite — squeeze glutes 2 seconds at top'},
+  {id:'r12',name:'Gentle Full-Body Circuit',desc:'A gentle full-body circuit for beginners: squats, bridges, knee push-ups, core and hip work, and a long final stretch.',cat:'beginner',color:'#818cf8',duration:'30 min',level:'Beginner',cal:145,exercises:[
+    {id:'squat',sets:2,reps:'12 reps',tip:'Push your knees gently outward on the way down'},
+    {id:'glmbridge',sets:2,reps:'12 reps',tip:'Squeeze your glutes for 2 seconds at the top'},
     {id:'kneepushup',sets:2,reps:'10 reps',tip:'Perfect starting point — same movement pattern as a full push-up'},
     {id:'downdogtoplank',sets:2,reps:'8 flows',tip:'Breathe in on plank, breathe out as you push back to dog'},
     {id:'sidelunge',sets:2,reps:'10 each side',tip:'Send hip back as you bend — weight stays in your heel'},
@@ -1092,19 +1085,19 @@ const ROUTINES = [
     {id:'childpose',sets:1,reps:'60s hold',tip:'Final reset. Breathe into the lower back — you earned this'},
   ]},
 
-  {id:'r13',name:'Hinge Health Hip & Glute Fix',desc:'Targeted hip mobility and glute activation circuit based on Hinge Health PT recommendations for desk workers and beginners.',cat:'strength',color:'#ec4899',duration:'20 min',level:'Beginner',cal:110,exercises:[
+  {id:'r13',name:'Hip & Glute Activation',desc:'A hip mobility and glute activation circuit for beginners and desk workers: gentle stretches, bridges, hip work and a long pigeon stretch.',cat:'strength',color:'#ec4899',duration:'20 min',level:'Beginner',cal:110,exercises:[
     {id:'cobrapush',sets:2,reps:'30s hold',tip:'Counteracts hours of forward-flexed sitting posture'},
     {id:'hipflexor',sets:2,reps:'45s each side',tip:'Most important stretch if you sit more than 4 hours a day'},
     {id:'glmbridge',sets:3,reps:'15 reps',tip:'Wake up those glutes — they get sleepy from sitting'},
     {id:'singlelegglute',sets:3,reps:'12 each leg',tip:'Keep hips level and square throughout the movement'},
-    {id:'firehydrant',sets:3,reps:'15 each side',tip:'Strengthens gluteus medius — protects knees and lower back'},
+    {id:'firehydrant',sets:3,reps:'15 each side',tip:'Strengthens the gluteus medius, a key hip stabiliser'},
     {id:'donkeykick',sets:3,reps:'15 each side',tip:'Lead with the heel, squeeze at the top every rep'},
     {id:'sidelunge',sets:3,reps:'10 each side',tip:'Great for hip adductors which get tight from prolonged sitting'},
     {id:'pigeonpose',sets:1,reps:'90s each side',tip:'Best hip stretch there is — breathe into the tension'},
   ]},
 
-  {id:'r14',name:'Healthline 1-Week Plan (Full)',desc:'The complete 1-week beginner program from Healthline, combining cardio days, strength circuits and active rest days into one routine.',cat:'beginner',color:'#0ea5e9',duration:'40 min',level:'Beginner',cal:190,exercises:[
-    {id:'briskhike',sets:1,reps:'10 min walk warm-up',tip:'Monday/Friday energy — moderate pace, arms pumping'},
+  {id:'r14',name:'Beginner Full Session',desc:'A complete beginner session in one routine: a walking warm-up, two strength circuits, then a cool-down and stretches.',cat:'beginner',color:'#0ea5e9',duration:'40 min',level:'Beginner',cal:190,exercises:[
+    {id:'briskhike',sets:1,reps:'10 min walk warm-up',tip:'Moderate pace, arms pumping'},
     {id:'jumpingjack',sets:3,reps:'20 reps',tip:'Full body warm-up before the strength circuit'},
     {id:'lunge',sets:3,reps:'10 each leg',tip:'Circuit 1 — alternate legs, controlled tempo'},
     {id:'pushup',sets:3,reps:'10 reps',tip:'Circuit 1 — modify to knees anytime'},
@@ -1117,8 +1110,8 @@ const ROUTINES = [
     {id:'childpose',sets:1,reps:'60s hold',tip:'Final recovery pose — breathe and let go'},
   ]},
 
-  // ── YOUTUBE-INSPIRED ROUTINES ─────────────────────────────────────────
-  {id:'r15',name:'Science-Based Full Body',desc:'Structured full-body routine inspired by Athlean-X and Jeremy Ethier. Each exercise is selected to hit a specific movement pattern — push, pull, hinge, squat, and carry.',cat:'strength',color:'#6366f1',duration:'40 min',level:'Intermediate',cal:260,exercises:[
+  // ── FULL-BODY AND CORE ROUTINES ─────────────────────────────────────────
+  {id:'r15',name:'Full-Body Movement Session',desc:'A structured full-body routine. Each exercise is chosen to train a specific movement: pushing, squatting, lunging, crawling and core control.',cat:'strength',color:'#6366f1',duration:'40 min',level:'Intermediate',cal:260,exercises:[
     {id:'inchworm',sets:2,reps:'8 reps',tip:'Warm-up: walk out slowly — feel the hamstring stretch'},
     {id:'tpushup',sets:4,reps:'10 reps (5 each side)',tip:'Slow push — explosive rotation at the top'},
     {id:'bulgariansplit',sets:3,reps:'10 each leg',tip:'Rear foot elevated on a couch or chair'},
@@ -1131,7 +1124,7 @@ const ROUTINES = [
     {id:'childpose',sets:1,reps:'60s',tip:'Full recovery — you earned it'},
   ]},
 
-  {id:'r16',name:'10-Min Core Blitz',desc:'Fast-paced, no-rest core circuit in the style of MadFit and Chloe Ting. Hits every angle of the abs — upper, lower, obliques, and deep core — in 10 intense minutes.',cat:'core',color:'#f43f5e',duration:'10 min',level:'Intermediate',cal:90,exercises:[
+  {id:'r16',name:'10-Min Core Blitz',desc:'Fast-paced, no-rest core circuit. Hits every angle of the abs — upper, lower, obliques, and deep core — in 10 intense minutes.',cat:'core',color:'#f43f5e',duration:'10 min',level:'Intermediate',cal:90,exercises:[
     {id:'hollowhold',sets:2,reps:'20s hold',tip:'The foundation: lower back welded to floor'},
     {id:'vup',sets:2,reps:'15 reps',tip:'Control the descent — the work is both ways'},
     {id:'spidermanplank',sets:2,reps:'10 each side',tip:'Pause 1 second at top — squeeze that oblique'},
@@ -1142,7 +1135,7 @@ const ROUTINES = [
     {id:'sideplank',sets:1,reps:'25s each side',tip:'Stack your feet or stagger — hold every second'},
   ]},
 
-  {id:'r17',name:'Athletic Power HIIT',desc:'Explosive athletic circuit in the style of Chloe Ting and PopSugar. Alternates power moves with core holds for maximum calorie burn and athletic conditioning.',cat:'hiit',color:'#f97316',duration:'30 min',level:'Intermediate',cal:310,exercises:[
+  {id:'r17',name:'Athletic Power HIIT',desc:'Explosive athletic circuit that alternates power moves with core holds for a hard cardio session and athletic conditioning.',cat:'hiit',color:'#f97316',duration:'30 min',level:'Intermediate',cal:310,exercises:[
     {id:'jumpingjack',sets:1,reps:'45s',tip:'Full arm swing — get the blood pumping'},
     {id:'jumplunge',sets:4,reps:'12 reps (6 each)',tip:'Land soft every time — knees tracking over toes'},
     {id:'shadowbox',sets:4,reps:'45s',tip:'Jab-cross-jab-cross — stay light on your feet'},
@@ -1155,7 +1148,7 @@ const ROUTINES = [
     {id:'childpose',sets:1,reps:'60s',tip:'Cooldown — full breath into the hips and back'},
   ]},
 
-  {id:'r18',name:'Calisthenics Foundation',desc:'A structured beginner calisthenics program inspired by popular YouTube skill-building videos. Teaches the fundamental movement patterns before progressing to harder skills.',cat:'beginner',color:'#84cc16',duration:'35 min',level:'Beginner',cal:155,exercises:[
+  {id:'r18',name:'Calisthenics Foundation',desc:'A structured beginner calisthenics program. Teaches the fundamental movement patterns before progressing to harder skills.',cat:'beginner',color:'#84cc16',duration:'35 min',level:'Beginner',cal:155,exercises:[
     {id:'armcircle',sets:2,reps:'20 each direction',tip:'Activate those shoulder joints before loading them'},
     {id:'inchworm',sets:3,reps:'8 reps',tip:'The single best movement prep exercise there is'},
     {id:'kneepushup',sets:3,reps:'15 reps',tip:'Master the pattern before moving to full push-ups'},
@@ -1168,7 +1161,7 @@ const ROUTINES = [
     {id:'cobrapush',sets:2,reps:'30s hold',tip:'Spinal extension to finish — breathe deep'},
   ]},
 
-  {id:'r19',name:'Advanced Bodyweight Beast',desc:'A challenging no-equipment routine for experienced athletes, inspired by Athlean-X XERO program. Tests strength, power, and stability without a single piece of equipment.',cat:'strength',color:'#dc2626',duration:'45 min',level:'Advanced',cal:330,exercises:[
+  {id:'r19',name:'Advanced Bodyweight Beast',desc:'A challenging no-equipment routine for experienced athletes. Tests strength, power, and stability without a single piece of equipment.',cat:'strength',color:'#dc2626',duration:'45 min',level:'Advanced',cal:330,exercises:[
     {id:'inchworm',sets:2,reps:'10 reps',tip:'Warm-up properly — this workout demands it'},
     {id:'diamondpushup',sets:4,reps:'15 reps',tip:'Go slow on the way down — 3 seconds eccentric'},
     {id:'bulgariansplit',sets:4,reps:'12 each leg',tip:'Pause at bottom position — 1 second stretch'},
@@ -1225,25 +1218,25 @@ const ROUTINES = [
     {id:'pigeonpose',sets:1,reps:'90s each side',tip:'Non-negotiable cooldown — your hips will thank you tomorrow'},
   ]},
 
-  // ── ARATA: HOME ISOMETRICS (DAY A / DAY B) ───────────────────────────
-  {id:'r23',name:'Isometric Day A: Push · Legs · L-Sit',desc:'Day A of the home isometrics plan from arata\'s video: push-up bottom, deep split squat and L-sit. Four rounds of 20–30 s holds at about 70% effort.',cat:'isometric',guide:'arata',color:'#2dd4bf',duration:'15 min',level:'Intermediate',cal:70,exercises:[
-    {id:'armcircle',sets:1,reps:'20 each direction',tip:'Warm-up (not from the video): loosen your shoulders before the holds'},
+  // ── HOME ISOMETRICS (DAY A / DAY B) ───────────────────────────
+  {id:'r23',name:'Isometric Day A: Push · Legs · L-Sit',desc:'Day A of a home isometrics plan: push-up bottom, deep split squat and L-sit. Four rounds of 20–30 s holds at about 70% effort.',cat:'isometric',guide:'iso',color:'#2dd4bf',duration:'15 min',level:'Intermediate',cal:70,exercises:[
+    {id:'armcircle',sets:1,reps:'20 each direction',tip:'Warm-up: loosen your shoulders before the holds'},
     {id:'isopushup',sets:4,reps:'20–30s hold',tip:'Body in one straight line — push the floor away at about 70% effort'},
     {id:'isolunge',sets:4,reps:'20–30s each leg',tip:'Hold the bottom, where most people are weakest — do both legs each round'},
     {id:'lsithold',sets:4,reps:'20–30s hold',tip:'Hands on two chairs, arms locked, legs out — tuck your knees if you need to'},
   ]},
 
-  {id:'r24',name:'Isometric Day B: Overcome · Hollow · Handstand',desc:'Day B of the home isometrics plan from arata\'s video: all-out overcoming holds, a hollow body hold and a wall handstand. Mixes 3–5 s maximal efforts with 20–30 s holds.',cat:'isometric',guide:'arata',color:'#38bdf8',duration:'15 min',level:'Intermediate',cal:70,exercises:[
-    {id:'armcircle',sets:1,reps:'20 each direction',tip:'Warm-up (not from the video): wake up your shoulders and wrists first'},
+  {id:'r24',name:'Isometric Day B: Overcome · Hollow · Handstand',desc:'Day B of a home isometrics plan: all-out overcoming holds, a hollow body hold and a wall handstand. Mixes 3–5 s maximal efforts with 20–30 s holds.',cat:'isometric',guide:'iso',color:'#38bdf8',duration:'15 min',level:'Intermediate',cal:70,exercises:[
+    {id:'armcircle',sets:1,reps:'20 each direction',tip:'Warm-up: wake up your shoulders and wrists first'},
     {id:'wallpush',sets:1,reps:'5 × 3–5s',tip:'Overcoming push: all-out effort, nothing moves — rest about 30 s between reps'},
     {id:'towelpull',sets:1,reps:'5 × 3–5s',tip:'Overcoming pull: try to rip the towel apart while you keep breathing'},
     {id:'hollowhold',sets:4,reps:'20–30s hold',tip:'Lower back pressed into the floor, shoulders and legs just off the ground'},
     {id:'wallhandstand',sets:3,reps:'20–30s hold',tip:'Push the floor away — skip this one if your wrists or shoulders hurt'},
   ]},
 
-  // ── THE REP THEORY: TENDON PLAN (PULL DAY / PUSH DAY) ────────────────
-  {id:'r25',name:'Rep Theory Pull Day: Core & Tendon Foundation',desc:'Days 1, 3 & 5 of a sample plan built on The Rep Theory\'s principles: bar hangs, shoulder-blade pulls, multi-angle holds, 5-second negatives and stable core work.',cat:'isometric',guide:'rep',color:'#fbbf24',duration:'25 min',level:'Intermediate',cal:110,equip:'Pull-up bar, sturdy chair',exercises:[
-    {id:'armcircle',sets:1,reps:'20 each direction',tip:'Warm-up (not from the plan): ease into your shoulders before hanging'},
+  // ── TENDON PLAN (PULL DAY / PUSH DAY) ────────────────
+  {id:'r25',name:'Tendon Plan, Pull Day: Core & Foundation',desc:'Days 1, 3 & 5 of a sample tendon-friendly plan: bar hangs, shoulder-blade pulls, multi-angle holds, 5-second negatives and stable core work.',cat:'isometric',guide:'tendon',color:'#fbbf24',duration:'25 min',level:'Intermediate',cal:110,equip:'Pull-up bar, sturdy chair',exercises:[
+    {id:'armcircle',sets:1,reps:'20 each direction',tip:'Warm-up: ease into your shoulders before hanging'},
     {id:'barhang',sets:3,reps:'30–45s hang',tip:'Moderate-to-high effort. Comfortably past 45 s? Add a weighted backpack instead of hanging longer'},
     {id:'scappull',sets:5,reps:'5s hold',tip:'Straight arms — pull your shoulder blades down and back, the active start of a pull-up'},
     {id:'multiangle',sets:3,reps:'5s per angle',tip:'Top, halfway, near-straight arms — 5 seconds at each angle is one round'},
@@ -1252,8 +1245,8 @@ const ROUTINES = [
     {id:'deadbughold',sets:3,reps:'20–30s each side',tip:'Another safe floor core option — keep your lower back pinned down'},
   ]},
 
-  {id:'r26',name:'Rep Theory Push Day: Isometrics & Structure',desc:'Days 2 & 4 of a sample plan built on The Rep Theory\'s principles: full-range push-ups, push-up bottom holds and farmer walks for forearm density.',cat:'isometric',guide:'rep',color:'#eab308',duration:'15 min',level:'Intermediate',cal:80,equip:'Heavy bags or water jugs',exercises:[
-    {id:'armcircle',sets:1,reps:'20 each direction',tip:'Warm-up (not from the plan): loosen your shoulders before pressing'},
+  {id:'r26',name:'Tendon Plan, Push Day: Isometrics & Structure',desc:'Days 2 & 4 of a sample tendon-friendly plan: full-range push-ups, push-up bottom holds and farmer walks for forearm density.',cat:'isometric',guide:'tendon',color:'#eab308',duration:'15 min',level:'Intermediate',cal:80,equip:'Heavy bags or water jugs',exercises:[
+    {id:'armcircle',sets:1,reps:'20 each direction',tip:'Warm-up: loosen your shoulders before pressing'},
     {id:'pushup',sets:3,reps:'8 reps',tip:'Full range and shoulder-blade control: spread them wide at the top, keep your body in one line'},
     {id:'isopushup',sets:4,reps:'20–30s hold',tip:'Hold the bottom or a mid-range position for a sustained time, at about 7 out of 10 effort'},
     {id:'farmerwalk',sets:3,reps:'30s carry',tip:'Heavy items, tall posture, no swinging — grip and forearms do the work'},
@@ -1262,21 +1255,21 @@ const ROUTINES = [
 
 // ─── TRAINING GUIDES (shown on the routine screen) ──────────────────────
 const GUIDES = {
-  arata: {
+  iso: {
     title:'ISOMETRIC TRAINING RULES',
-    by:"From a summary of arata's home isometrics video.",
+    by:"A short guide to training with isometric holds.",
     items:[
       {h:'Why holds work', t:'Muscles can produce more force when held still than during a lifting movement, and holds also improve tendon stiffness. Ideal for training at home without weights.'},
-      {h:'The two-dial rule', t:'Combine long holds (20–30 seconds at about 70% effort) for tendons and muscle with short all-out bursts (3–5 seconds) that train your brain to fire muscles efficiently.'},
-      {h:'Breathe and stay safe', t:'Keep breathing during every hold to manage blood pressure. Skip the wall handstand if you have wrist or shoulder pain.'},
+      {h:'Long holds plus short bursts', t:'Combine long holds (20–30 seconds at about 70% effort) for tendons and muscle with short all-out bursts (3–5 seconds) that train your brain to fire muscles efficiently.'},
+      {h:'Breathe and stay safe', t:'Keep breathing during every hold and never hold your breath. Skip the wall handstand if you have wrist or shoulder pain.'},
       {h:'How often', t:'Aim for 3–4 hard sessions per week. The weekly plan has two session types: Day A and Day B.'},
       {h:'What to expect', t:'Nervous-system gains come quickly. Significant tendon and muscle adaptations take about 12 weeks of consistent effort.'}
     ],
     note:'General information, not medical advice. Check with a doctor first if you have an injury, pain or a health condition.'
   },
-  rep: {
-    title:'THE REP THEORY PRINCIPLES',
-    by:"From a summary of The Rep Theory (@thereptheory111). The Pull Day and Push Day apply those principles as a sample plan; they are not a copy of one specific program.",
+  tendon: {
+    title:'TENDON TRAINING PRINCIPLES',
+    by:"The Pull Day and Push Day apply these principles as a sample plan.",
     items:[
       {h:'1 · Train your tendons', t:'Muscle adapts fast, tendons lag behind. Stiffer tendons act like rigid cables instead of stretchy bungee cords, which makes pull-ups and push-ups far more efficient.'},
       {h:'2 · Use isometric holds', t:'Hold static positions at roughly 7 out of 10 effort, or push all-out, to recruit deep stabilizing fibers and build joint strength.'},
@@ -1326,25 +1319,8 @@ function renderRoutines(cat) {
   const container = document.getElementById('routines-container');
   const filtered = cat === 'all' ? ROUTINES : ROUTINES.filter(r => r.cat === cat);
   container.innerHTML = filtered.map(r => {
-    const isHealthline = ['r11','r14'].includes(r.id);
-    const isHinge = ['r12','r13'].includes(r.id);
-    const isYouTube = ['r15','r16','r17','r18','r19'].includes(r.id);
-    const isIso = ['r20','r21','r22'].includes(r.id);
-    const isArata = ['r23','r24'].includes(r.id);
-    const isRep = ['r25','r26'].includes(r.id);
-    const sourceBadge = isHealthline
-      ? `<span class="source-badge source-healthline">🩺 Healthline</span>`
-      : isHinge
-        ? `<span class="source-badge source-hinge">🏥 Hinge Health</span>`
-        : isYouTube
-          ? `<span class="source-badge source-youtube">▶️ YouTube-style</span>`
-          : isIso
-            ? `<span class="source-badge source-iso">⚡ Isometric</span>`
-            : isArata
-              ? `<span class="source-badge source-arata">▶️ arata</span>`
-              : isRep
-                ? `<span class="source-badge source-rep">▶️ The Rep Theory</span>`
-                : '';
+    const isIso = ['r20','r21','r22','r23','r24','r25','r26'].includes(r.id);
+    const sourceBadge = isIso ? `<span class="source-badge source-iso">⚡ Isometric</span>` : '';
     return `
     <div class="routine-card" onclick="openRoutine('${r.id}')">
       <div class="routine-card-inner">
@@ -1810,7 +1786,7 @@ function stepStripHTML(ex) {
     <p class="step-note">${s.svgs.length > 1 ? '<span class="swipe-hint">Swipe sideways to see every step. </span>' : ''}Simplified drawings: the glowing limbs are the ones working.</p>`;
 }
 
-// Workout screen: the positions loop as a small slideshow; tapping it opens the full guide (big pictures, captions, photo)
+// Workout screen: the positions loop as a small slideshow; tapping it opens the full guide (big pictures and captions)
 let awPic = { timer:null, i:0, n:0, id:null };
 const awReduced = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e) { return false; } };
 
@@ -1864,16 +1840,11 @@ if(awWrapEl) {
   awWrapEl.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); awOpenGuide(); } });
 }
 
-async function openExercise(id) {
+function openExercise(id) {
   const ex = EXERCISES.find(e => e.id === id); if(!ex) return;
-  // Render modal immediately with loading state
+  // Everything here is local: the dialog opens at once, no photo is fetched from anywhere
   document.getElementById('ex-modal-body').innerHTML = `
-    <div class="demo-area" id="ex-demo-area">
-      <div class="img-loading">
-        <div class="spinner"></div>
-        <p>LOADING IMAGE...</p>
-      </div>
-    </div>
+    <div class="demo-area" id="ex-demo-area" aria-hidden="true">${ex.icon}</div>
     <h2>${ex.name}</h2>
     <div class="muscles-tags">
       <span class="muscle-tag primary">🎯 ${ex.muscle}</span>
@@ -1890,28 +1861,6 @@ async function openExercise(id) {
   document.getElementById('ex-modal-content').scrollTop = 0;
   document.getElementById('ex-modal').classList.toggle('over-workout', document.getElementById('active-workout').classList.contains('open'));
   document.getElementById('ex-modal').classList.add('open');
-  // Fetch Wikipedia image
-  const demoArea = document.getElementById('ex-demo-area');
-  if(!demoArea) return;
-  try {
-    const wikiTitle = ex.wiki || ex.name;
-    const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${encodeURIComponent(wikiTitle)}&format=json&pithumbsize=600&origin=*`;
-    const res = await fetch(apiUrl);
-    const data = await res.json();
-    const pages = data.query.pages;
-    const page = Object.values(pages)[0];
-    const imgUrl = page?.thumbnail?.source;
-    if(imgUrl && demoArea) {
-      demoArea.innerHTML = `
-        <img src="${imgUrl}" alt="${ex.name}" onerror="this.parentElement.innerHTML='<span style=\\'font-size:80px\\'>${ex.icon}</span>'" />
-        <div class="demo-img-overlay"></div>
-        <div class="demo-img-label">📷 ${wikiTitle} • Wikipedia</div>`;
-    } else {
-      demoArea.innerHTML = `<span style="font-size:80px">${ex.icon}</span>`;
-    }
-  } catch(e) {
-    if(demoArea) demoArea.innerHTML = `<span style="font-size:80px">${ex.icon}</span>`;
-  }
 }
 
 function closeExModal(e) {
@@ -2033,8 +1982,8 @@ async function renderActiveExercise() {
 function nextSetTap() {
   if(awLocked() || workoutState.resting) return;
   const h = holdT, w = workoutState;
-  // a timed set has to run out first; a counted (reps) set only waits while the get-ready countdown is still running
-  const waiting = h && (h.plan.repsOnly ? h.phase === 'ready' : h.phase !== 'done');
+  // a timed set has to run out first; a counted (reps) set waits while the get-ready countdown or (AUTO) the rep count is still running
+  const waiting = h && (h.plan.repsOnly ? (h.phase === 'ready' || h.phase === 'reps' || h.phase === 'switch') : h.phase !== 'done');
   if(waiting && Date.now() > (w.confirmUntil || 0)) {
     // ask once before counting this set as done
     w.confirmUntil = Date.now() + 3000;
@@ -2224,7 +2173,24 @@ const HOLD_READY_SECS = 5;
 const HOLD_SWITCH_SECS = 5;
 const HOLD_FIRST_READY_SECS = 10;   // very first exercise: time to put the phone down and get into position
 const HOLD_REP_REST_SECS = 8;       // rest between the separate holds of "5 × 3–5s"
-let autoOn = true;                  // AUTO: timed exercises start by themselves (switch on the timer card)
+
+// Counted sets (reps), AUTO: after GO the app counts the reps down by itself, one every few seconds, and the set ends by itself.
+// Seconds per rep for each exercise (quick moves ~1 s, steady ones 2–3 s, slow ones longer). The PACE button makes all of them slower or faster.
+const REP_PACE_DEFAULT = 2.5;
+const REP_PACE = {
+  jumpingjack:1, armcircle:1, bearcrawl:1.5, bicycle:1.5, russiantwist:1.5,
+  crunch:2, calfrise:2, donkeykick:2, firehydrant:2, hipabduction:2, jumplunge:2, toetouch:2,
+  squat:2.5, jumpsquat:2.5, pushup:2.5, widepushup:2.5, kneepushup:2.5, spidermanplank:2.5, vup:2.5,
+  superman:3, lunge:3, reverselunge:3, sidelunge:3, glmbridge:3, singlelegglute:3, legrise:3, situp:3, tricdip:3,
+  diamondpushup:3, declinepushup:3, piketopushup:3, bulgariansplit:3.5,
+  burpee:4, tpushup:4, downdogtoplank:4, inchworm:5, slowneg:8,
+};
+const PACE_LEVELS = { normal:1, slow:1.4, fast:0.7 };
+const REP_PART_NOUN = { armcircle:'DIRECTION', jumplunge:'LEG' };   // what "each" means when the text doesn't say (default: side)
+let paceLevel = 'normal';
+try { const p = localStorage.getItem('ironbody-pace'); if(Object.prototype.hasOwnProperty.call(PACE_LEVELS, p)) paceLevel = p; } catch(e) {}
+
+let autoOn = true;                  // AUTO: countdowns start and run by themselves, no taps (switch on the timer card)
 try { autoOn = localStorage.getItem('ironbody-auto') !== 'off'; } catch(e) {}
 let holdT = null;
 let cuesOn = true;
@@ -2260,6 +2226,25 @@ function parseHold(reps) {
   else if(sm) { const n = sm[1].toUpperCase(); parts = [`${n} 1 OF 2`, `${n} 2 OF 2`]; }
   return { secs: hi * mult, min: lo < hi ? lo * mult : 0, parts, reps: 1 };
 }
+
+// Turns a reps string into the plan for counting a set down, or null when there is no number to count.
+//   counts = reps in each part (two parts for "each side / leg / direction", "10 steps fwd + 10 back", "10 reps (5 each side)")
+//   parts  = labels of those parts     secs = seconds per rep at normal pace
+function parseRepPlan(reps, id) {
+  const r = String(reps).toLowerCase();
+  const m = r.match(/^\s*(\d+)(?:\s*[–-]\s*(\d+))?/);
+  if(!m) return null;
+  const n = +(m[2] || m[1]);
+  if(!(n > 0 && n <= 200)) return null;
+  const two = noun => [`${noun} 1 OF 2`, `${noun} 2 OF 2`];
+  let counts = [n], parts = null, k;
+  if(/\bsteps?\b/.test(r) && (k = r.match(/\+\s*(\d+)\s*(?:back|backwards?)\b/))) { counts = [n, +k[1]]; parts = ['FORWARD', 'BACK']; }   // "10 steps fwd + 10 back"
+  else if((k = r.match(/\(\s*(\d+)\s*each\b[^)]*\)/))) { counts = [+k[1], +k[1]]; parts = two(REP_PART_NOUN[id] || 'SIDE'); }          // "10 reps (5 each side)", "12 reps (6 each)"
+  else if((k = r.match(/\beach\s+(side|leg|arm|hand|foot|direction)\b/)) || (k = r.match(/\bper\s+(side)\b/))) { counts = [n, n]; parts = two(k[1].toUpperCase()); }   // "12 each leg", "20 reps each side"
+  else if(/\beach\b/.test(r)) { counts = [n, n]; parts = two(REP_PART_NOUN[id] || 'SIDE'); }                                              // "20 each"
+  return { counts, parts, secs: (REP_PACE[id] || REP_PACE_DEFAULT) * (/\bslow\b/.test(r) ? 1.5 : 1) };
+}
+function repPaceMs(h) { return Math.round(h.plan.pace.secs * PACE_LEVELS[paceLevel] * 1000); }
 
 // Beeps (Web Audio) and vibration, both switched by the 🔊 button on the counter
 function cue(freq, ms, vol) {
@@ -2316,8 +2301,8 @@ function holdSetup(exEntry) {
   holdStop();
   const t = parseTarget(exEntry.reps);
   // an exercise counted in reps gets a get-ready countdown only (repsOnly); a timed one gets the whole hold timer
-  const plan = parseHold(exEntry.reps) || { secs:0, min:0, parts:null, reps:1, repsOnly:true };
-  holdT = { plan, phase:'idle', part:0, rep:1, idleCount:t.count, idleUnit:t.unit, timer:null, doneTimer:null, goTimer:null };
+  const plan = parseHold(exEntry.reps) || { secs:0, min:0, parts:null, reps:1, repsOnly:true, pace:parseRepPlan(exEntry.reps, exEntry.id) };
+  holdT = { plan, phase:'idle', part:0, rep:1, idleCount:t.count, idleUnit:t.unit, timer:null, doneTimer:null, goTimer:null, paced:false };
   holdRender();
 }
 
@@ -2335,14 +2320,47 @@ function holdBegin(phase, secs, from) {
   h.lastSec = null;
   h.minDone = false;
   h.remain = null;
-  if(!h.timer) h.timer = setInterval(holdTick, 200);
+  if(!h.timer) h.timer = setInterval(holdTick, h.plan.repsOnly ? 100 : 200);
   holdTick();
+}
+
+// AUTO, counted set: the reps count down by themselves (one every paceMs); when the last one is done the set ends by itself
+function holdBeginReps(from) {
+  const h = holdT; if(!h || !h.plan.pace) return;
+  const n = h.plan.pace.counts[h.part];
+  h.paced = true;
+  h.repN = n;
+  h.paceMs = repPaceMs(h);
+  h.phase = 'reps';
+  h.total = n * h.paceMs;
+  h.endAt = (from || Date.now()) + h.total;
+  h.lastSec = null;
+  h.lastReps = n;
+  h.minDone = false;
+  h.remain = null;
+  if(!h.timer) h.timer = setInterval(holdTick, 100);
+  holdTick();
+}
+
+// PACE button: normal → slow → fast. The reps still to do just come slower or faster from now on.
+function cyclePace() {
+  const order = ['normal', 'slow', 'fast'];
+  paceLevel = order[(order.indexOf(paceLevel) + 1) % order.length];
+  try { localStorage.setItem('ironbody-pace', paceLevel); } catch(e) {}
+  const h = holdT;
+  if(h && h.phase === 'reps') {
+    const left = h.remain != null ? h.remain : h.endAt - Date.now();
+    const repsLeft = left / h.paceMs;
+    h.paceMs = repPaceMs(h);
+    if(h.remain != null) h.remain = repsLeft * h.paceMs; else h.endAt = Date.now() + repsLeft * h.paceMs;
+  }
+  holdRender();
 }
 
 // The footer button starts the timer, or cancels it while it's running
 function holdStart() {
   const h = holdT; if(!h) return;
-  if(h.plan.repsOnly && h.phase === 'ready') { holdPhaseEnd(); return; }   // SKIP COUNTDOWN: straight to GO
+  if(h.plan.repsOnly && (h.phase === 'ready' || h.phase === 'switch')) { h.endAt = Date.now(); holdPhaseEnd(); return; }   // SKIP COUNTDOWN: straight to GO (the rep count starts now, not when the skipped countdown would have ended)
   if(h.phase !== 'idle') { holdCancel(); return; }
   cue(520, 70, .14); buzz(25);   // inside the tap, so the browser allows sound
   holdBegin('ready', HOLD_READY_SECS);
@@ -2352,7 +2370,7 @@ function holdStart() {
 function holdCancel() {
   const h = holdT; if(!h) return;
   clearInterval(h.timer); h.timer = null;
-  h.phase = 'idle'; h.part = 0; h.remain = null;
+  h.phase = 'idle'; h.part = 0; h.remain = null; h.paced = false;
   holdRender();
 }
 
@@ -2373,9 +2391,19 @@ function holdAutoStart() {
 function toggleAuto() {
   autoOn = !autoOn;
   try { localStorage.setItem('ironbody-auto', autoOn ? 'on' : 'off'); } catch(e) {}
+  const h = holdT;
+  if(h && h.plan.repsOnly) {
+    if(!autoOn && (h.phase === 'reps' || h.phase === 'switch')) {
+      // MANUAL while the app is counting the reps: it stops counting, the rest of the set is yours (tap COMPLETE SET when done)
+      clearInterval(h.timer); h.timer = null;
+      h.paced = false; h.part = 0; h.remain = null; h.goUntil = 0; h.phase = 'go';
+    } else if(autoOn && h.phase === 'go' && h.plan.pace && !workoutState.paused && !workoutState.resting) {
+      holdBeginReps();   // AUTO again after GO: the app takes over the count from the first rep
+    }
+  }
   holdRender();
   if(autoOn && holdT && holdT.phase === 'idle' && !workoutState.paused && !workoutState.resting) holdAutoStart();
-  toast(autoOn ? 'AUTO: countdowns start by themselves' : 'MANUAL: tap START to begin a countdown');
+  toast(autoOn ? 'AUTO: the app counts and moves on by itself' : 'MANUAL: tap START to begin a countdown');
 }
 
 // Browsers only allow sound after a tap, so START WORKOUT wakes the audio engine up
@@ -2389,26 +2417,64 @@ function unlockAudio() {
 function holdTick() {
   const h = holdT;
   if(!h || workoutState.paused) return;
-  if(h.phase !== 'ready' && h.phase !== 'hold' && h.phase !== 'switch') return;
+  if(h.phase !== 'ready' && h.phase !== 'hold' && h.phase !== 'switch' && h.phase !== 'reps') return;
   const left = h.endAt - Date.now();
-  const sec = Math.max(0, Math.ceil(left / 1000));
-  const longPhase = h.phase !== 'hold' || h.total >= 8000;   // no 3-2-1 ticks inside very short holds
-  if(sec !== h.lastSec) {
-    h.lastSec = sec;
-    if(longPhase && sec >= 1 && sec <= 3) cue(660, 110, .22);
-  }
-  if(h.phase === 'hold' && h.plan.min && longPhase && !h.minDone && h.total - left >= h.plan.min * 1000) {
-    h.minDone = true;                                         // bottom of the range reached
-    cue(523, 140, .2); setTimeout(() => cue(659, 200, .2), 170); buzz([60, 40, 60]);
+  if(h.phase === 'reps') {
+    // one soft tick whenever a rep is due to be finished; the last three reps get the 3-2-1 beeps
+    const repsLeft = Math.max(0, Math.ceil(left / h.paceMs));
+    if(repsLeft !== h.lastReps) {
+      if(repsLeft >= 1 && repsLeft < h.lastReps) { if(repsLeft <= 3) cue(660, 110, .22); else cue(1250, 40, .1); }
+      h.lastReps = repsLeft;
+    }
+  } else {
+    const sec = Math.max(0, Math.ceil(left / 1000));
+    const longPhase = h.phase !== 'hold' || h.total >= 8000;   // no 3-2-1 ticks inside very short holds
+    if(sec !== h.lastSec) {
+      h.lastSec = sec;
+      if(longPhase && sec >= 1 && sec <= 3) cue(660, 110, .22);
+    }
+    if(h.phase === 'hold' && h.plan.min && longPhase && !h.minDone && h.total - left >= h.plan.min * 1000) {
+      h.minDone = true;                                         // bottom of the range reached
+      cue(523, 140, .2); setTimeout(() => cue(659, 200, .2), 170); buzz([60, 40, 60]);
+    }
   }
   holdRender(left);
   if(left <= 0) holdPhaseEnd();
 }
 
+// the whole set is finished: chime, then the set completes itself
+function holdFinishSet() {
+  const h = holdT; if(!h) return;
+  h.phase = 'done';
+  clearInterval(h.timer); h.timer = null;
+  cue(880, 150, .28); setTimeout(() => cue(1175, 320, .28), 190); buzz([150, 80, 150, 80, 320]);
+  holdRender();
+  h.doneTimer = setTimeout(() => { if(holdT === h) nextSet(); }, 1300);
+}
+
 function holdPhaseEnd() {
   const h = holdT; if(!h) return;
   const plan = h.plan, prevEnd = h.endAt;
-  if(plan.repsOnly) {                                           // counted exercise: the countdown ends with GO, then the reps are yours
+  if(plan.repsOnly) {
+    if(plan.pace && autoOn) {                                   // AUTO: the app counts the reps and ends the set by itself
+      if(h.phase === 'ready' || h.phase === 'switch') {         // GO → the reps start counting down right away
+        cue(990, 380, .3); buzz(180);
+        h.goUntil = Date.now() + 1300;
+        holdBeginReps(prevEnd);
+        return;
+      }
+      if(h.phase === 'reps') {
+        if(h.part < plan.pace.counts.length - 1) {              // next side / leg / direction
+          h.part++;
+          cue(784, 150, .25); buzz([80, 50, 80]);
+          holdBegin('switch', HOLD_SWITCH_SECS, prevEnd);
+          return;
+        }
+        holdFinishSet();
+        return;
+      }
+    }
+    // MANUAL: the countdown ends with GO, then the reps are yours
     clearInterval(h.timer); h.timer = null;
     cue(990, 380, .3); buzz(180);
     h.phase = 'go'; h.goUntil = Date.now() + 1300;
@@ -2436,16 +2502,12 @@ function holdPhaseEnd() {
     holdRender();
     return;
   }
-  h.phase = 'done';                                             // whole set finished
-  clearInterval(h.timer); h.timer = null;
-  cue(880, 150, .28); setTimeout(() => cue(1175, 320, .28), 190); buzz([150, 80, 150, 80, 320]);
-  holdRender();
-  h.doneTimer = setTimeout(() => { if(holdT === h) nextSet(); }, 1300);
+  holdFinishSet();                                              // whole set finished
 }
 
 function holdPause() {
   const h = holdT; if(!h) return;
-  if(h.phase === 'ready' || h.phase === 'hold' || h.phase === 'switch') h.remain = h.endAt - Date.now();
+  if(h.phase === 'ready' || h.phase === 'hold' || h.phase === 'switch' || h.phase === 'reps') h.remain = h.endAt - Date.now();
   if(h.phase === 'done') { clearTimeout(h.doneTimer); h.donePending = true; }
 }
 function holdResume() {
@@ -2461,42 +2523,58 @@ function holdRender(leftMs) {
   const soundBtn = document.getElementById('hold-sound-btn');
   const startBtn = document.getElementById('hold-start-btn');
   const autoBtn = document.getElementById('hold-auto-btn');
+  const paceBtn = document.getElementById('hold-pace-btn');
   const nextBtn = document.getElementById('aw-next-btn');
   const h = holdT;
   if(!h) {
     counter.className = 'aw-counter';
-    panel.style.display = 'none'; soundBtn.style.display = 'none'; startBtn.style.display = 'none'; autoBtn.style.display = 'none';
+    panel.style.display = 'none'; soundBtn.style.display = 'none'; startBtn.style.display = 'none'; autoBtn.style.display = 'none'; paceBtn.style.display = 'none';
     nextBtn.classList.remove('secondary');
     return;
   }
   const plan = h.plan;
-  const isReps = !!plan.repsOnly;   // an exercise counted in reps: only a get-ready countdown, the reps are done at your own pace
+  const isReps = !!plan.repsOnly;   // counted in reps: get-ready countdown, then AUTO counts the reps down by itself (MANUAL: the reps are yours, tap COMPLETE SET)
+  const pace = isReps ? plan.pace : null;
   const num = document.getElementById('aw-count'), lbl = document.getElementById('aw-count-lbl');
   const msg = document.getElementById('hold-msg'), bar = document.getElementById('hold-bar-fill');
-  const running = h.phase === 'ready' || h.phase === 'hold' || h.phase === 'switch';
-  const flash = isReps && h.phase === 'go' && Date.now() < (h.goUntil || 0);   // the "GO!" moment
+  const running = h.phase === 'ready' || h.phase === 'hold' || h.phase === 'switch' || h.phase === 'reps';
+  if(leftMs == null && running) leftMs = h.remain != null ? h.remain : h.endAt - Date.now();   // drawn between two ticks: take the time from the clock
+  const flash = isReps && (h.phase === 'go' || h.phase === 'reps') && Date.now() < (h.goUntil || 0);   // the "GO!" moment
+  const counting = !!pace && (h.phase === 'reps' || h.phase === 'switch' || (h.phase === 'done' && h.paced));   // the app is counting the reps
   const sec = leftMs == null ? 0 : Math.max(0, Math.ceil(leftMs / 1000));
-  const pct = running && h.total && leftMs != null ? Math.min(100, Math.max(0, (h.total - leftMs) / h.total * 100)) : 0;
-  const partTxt = plan.parts ? plan.parts[h.part] : (plan.reps > 1 ? `REP ${h.rep} OF ${plan.reps}` : '');
+  const total = h.phase === 'reps' ? h.repN * h.paceMs : h.total;
+  const pct = running && total && leftMs != null ? Math.min(100, Math.max(0, (total - leftMs) / total * 100)) : 0;
+  const parts = isReps ? (pace && autoOn ? pace.parts : null) : plan.parts;
+  const partTxt = parts ? parts[h.part] : (plan.reps > 1 ? `REP ${h.rep} OF ${plan.reps}` : '');
   panel.style.display = ''; soundBtn.style.display = ''; startBtn.style.display = '';
   autoBtn.style.display = '';
   autoBtn.classList.toggle('on', autoOn);
   autoBtn.textContent = autoOn ? 'AUTO' : 'MANUAL';
   autoBtn.setAttribute('aria-pressed', autoOn ? 'true' : 'false');
-  autoBtn.setAttribute('aria-label', autoOn ? 'Countdowns start by themselves. Tap to switch to manual start.' : 'Countdowns wait for a tap. Tap to switch to automatic start.');
+  autoBtn.setAttribute('aria-label', autoOn ? 'Countdowns and reps run by themselves. Tap to switch to manual.' : 'Countdowns wait for a tap. Tap to switch to automatic.');
   autoBtn.title = autoBtn.getAttribute('aria-label');
-  nextBtn.classList.toggle('secondary', !isReps);   // reps: COMPLETE SET stays the main button
+  nextBtn.classList.toggle('secondary', !isReps || (!!pace && autoOn));   // AUTO runs the whole set, so the button is only for finishing early; MANUAL reps: COMPLETE SET stays the main button
   holdSoundUI();
   counter.className = 'aw-counter timed' + (isReps ? ' reps' : '') + (h.phase === 'ready' || h.phase === 'switch' ? ' ready' : (h.phase === 'done' || flash) ? ' done' : '');
   startBtn.classList.toggle('running', running && !isReps);
   startBtn.classList.toggle('ghost', isReps);
   startBtn.style.visibility = h.phase === 'done' ? 'hidden' : '';
-  if(isReps && h.phase === 'go') startBtn.style.display = 'none';   // the countdown is over, nothing left to start
+  if(isReps && (h.phase === 'go' || h.phase === 'reps')) startBtn.style.display = 'none';   // the countdown is over, nothing left to start
   startBtn.textContent = isReps
-    ? (h.phase === 'ready' ? '⏭ SKIP COUNTDOWN' : '⏱ START COUNTDOWN')
+    ? ((h.phase === 'ready' || h.phase === 'switch') ? '⏭ SKIP COUNTDOWN' : '⏱ START COUNTDOWN')
     : (running ? '■ CANCEL TIMER' : (plan.reps > 1 ? `▶ START REP ${h.rep} OF ${plan.reps}` : '▶ START TIMER'));
-  if(bar.parentNode) bar.parentNode.style.visibility = isReps && h.phase !== 'ready' ? 'hidden' : '';
+  if(bar.parentNode) bar.parentNode.style.visibility = isReps && !counting && h.phase !== 'ready' ? 'hidden' : '';
   bar.style.width = (h.phase === 'done' ? 100 : pct) + '%';
+  // while the app counts the reps, the pace button takes the place of the hint line (same height)
+  const showPace = counting && h.phase === 'reps';
+  paceBtn.style.display = showPace ? '' : 'none';
+  msg.style.display = showPace ? 'none' : '';
+  if(showPace) {
+    const s = Math.round(h.paceMs / 100) / 10;
+    paceBtn.textContent = `PACE: ${paceLevel.toUpperCase()} · ${s} s/rep`;
+    paceBtn.setAttribute('aria-label', `Pace ${paceLevel}, ${s} seconds per rep. Tap to change.`);
+    paceBtn.title = paceBtn.getAttribute('aria-label');
+  }
   if(h.phase === 'ready') {
     num.textContent = sec; lbl.textContent = 'GET READY' + (partTxt ? ' · ' + partTxt : '');
     msg.textContent = (plan.reps > 1 && h.rep > 1) ? 'Rest a moment, the next rep is about to start' : 'Get into position';
@@ -2504,8 +2582,11 @@ function holdRender(leftMs) {
     num.textContent = fmtClock(sec); lbl.textContent = 'TIME LEFT' + (partTxt ? ' · ' + partTxt : '');
     msg.textContent = h.minDone ? 'Minimum reached — keep going to the end if you can' : 'Keep breathing and hold good form';
   } else if(h.phase === 'switch') {
-    num.textContent = sec; lbl.textContent = 'NEXT → ' + plan.parts[h.part];
+    num.textContent = sec; lbl.textContent = 'NEXT → ' + (isReps ? pace.parts : plan.parts)[h.part];
     msg.textContent = 'Switch now';
+  } else if(h.phase === 'reps') {
+    if(flash) { num.textContent = 'GO!'; lbl.textContent = 'DO YOUR REPS'; }
+    else { num.textContent = Math.max(0, Math.ceil((leftMs || 0) / h.paceMs)); lbl.textContent = 'REPS LEFT' + (partTxt ? ' · ' + partTxt : ''); }
   } else if(h.phase === 'done') {
     num.textContent = '✓'; lbl.textContent = 'SET DONE'; msg.textContent = '';
   } else if(isReps) {

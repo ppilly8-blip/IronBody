@@ -1,5 +1,5 @@
-// IronBody offline cache. Everything the app needs is stored on first visit; photos from Wikipedia still need internet.
-const CACHE = 'ironbody-058785fd74';
+// IronBody offline cache. Everything the app needs is stored on first visit, so the app works without internet.
+const CACHE = 'ironbody-cae7581444';
 const ASSETS = [
   "./",
   "index.html",
@@ -33,7 +33,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
-  if (new URL(req.url).origin !== self.location.origin) return;          // Wikipedia photos etc.: normal network request
+  if (new URL(req.url).origin !== self.location.origin) return;          // other sites: normal network request (the app itself makes none)
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const hit = await cache.match(req, { ignoreSearch: true });
