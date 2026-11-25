@@ -149,6 +149,47 @@ if (build > 0) {
   }
 }
 
+// 3e. Google Play bundle (.aab). It is signed with a private "upload key" that is NOT in this repository:
+//     the build reads it from environment variables, which the workflow fills from the repository secrets
+//     (see .github/workflows/build-apk.yml). When the variables are missing nothing changes - the debug
+//     build and the APK behave exactly as before.
+{
+  const gradleFile = path.join(androidDir, 'app', 'build.gradle');
+  let gradle = fs.readFileSync(gradleFile, 'utf8');
+  if (!gradle.includes('ironbodyUpload')) {
+    const signing = /^([ \t]*)signingConfigs\s*\{\n/m.exec(gradle);
+    const release = /^([ \t]*)release\s*\{\n/m.exec(gradle);
+    if (!signing || !release || release.index < signing.index) {
+      fail('signingConfigs / release block not found in app/build.gradle - the Capacitor template looks different than expected.');
+    }
+    // the release block comes later in the file, so patch it first (the earlier offsets stay valid)
+    const r = release[1];
+    const afterRelease = release.index + release[0].length;
+    gradle =
+      gradle.slice(0, afterRelease) +
+      r + "    if (System.getenv('IRONBODY_UPLOAD_KEYSTORE')) {\n" +
+      r + '        signingConfig signingConfigs.ironbodyUpload\n' +
+      r + '    }\n' +
+      gradle.slice(afterRelease);
+    const s = signing[1];
+    const afterSigning = signing.index + signing[0].length;
+    gradle =
+      gradle.slice(0, afterSigning) +
+      s + '    ironbodyUpload {\n' +
+      s + "        def uploadKeystore = System.getenv('IRONBODY_UPLOAD_KEYSTORE')\n" +
+      s + '        if (uploadKeystore) {\n' +
+      s + '            storeFile file(uploadKeystore)\n' +
+      s + "            storePassword System.getenv('IRONBODY_UPLOAD_PASSWORD')\n" +
+      s + "            keyAlias System.getenv('IRONBODY_UPLOAD_ALIAS') ?: 'ironbody-upload'\n" +
+      s + "            keyPassword System.getenv('IRONBODY_UPLOAD_PASSWORD')\n" +
+      s + '        }\n' +
+      s + '    }\n' +
+      gradle.slice(afterSigning);
+    fs.writeFileSync(gradleFile, gradle);
+    log('release bundle is signed with the upload key when the build provides one');
+  }
+}
+
 // ---- 4. copy the web app into the Android app ----------------------------------------------
 log('copying www/ into the Android app ...');
 cap('sync', 'android');

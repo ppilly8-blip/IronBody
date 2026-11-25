@@ -11,3 +11,11 @@ ios/
 .DS_Store
 Thumbs.db
 *.log
+
+# The private Google Play upload key must never be committed (it belongs in GitHub Secrets).
+# keystore/debug.keystore is the public debug key and stays tracked.
+*.p12
+*.jks
+*.pfx
+ironbody-upload*
+key.b64.txt

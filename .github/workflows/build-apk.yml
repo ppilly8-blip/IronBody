@@ -77,7 +77,136 @@ jobs:
           path: IronBody.apk
           if-no-files-found: error
 
-      # Puts IronBody.apk on the Releases page, so it can be downloaded straight to a phone.
+      # ── Google Play bundle (.aab) ──────────────────────────────────────────────────────────
+      # Google Play wants an .aab file signed with a private "upload key". That key is NOT in this
+      # repository: it lives in two repository secrets (Settings -> Secrets and variables -> Actions):
+      #     ANDROID_KEYSTORE_BASE64     the key file, as text
+      #     ANDROID_KEYSTORE_PASSWORD   its password
+      # Without them the bundle is still built once with a throw-away key, only to prove the build works;
+      # that bundle is not published. None of the steps below can stop the APK from being published.
+      - name: Play bundle - is the upload key set up?
+        id: upload_key
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          PW: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KS" ] && [ -n "$PW" ]; then echo "have=true" >> "$GITHUB_OUTPUT"; else echo "have=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Play bundle - get the signing key ready
+        id: key
+        continue-on-error: true
+        shell: bash
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          PW: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          HAVE: ${{ steps.upload_key.outputs.have }}
+        run: |
+          KEYFILE="$RUNNER_TEMP/ironbody-upload.jks"
+          if [ "$HAVE" = "true" ]; then
+            # tolerate line breaks / spaces that sneak in when the text is pasted into the secret
+            printf '%s' "$KS" | tr -d ' \r\n\t' | base64 -d > "$KEYFILE"
+            MODE=real
+          else
+            PW=$(openssl rand -hex 16)
+            echo "::add-mask::$PW"
+            keytool -genkeypair -keystore "$KEYFILE" -storetype PKCS12 -alias ironbody-upload \
+              -keyalg RSA -keysize 2048 -validity 3650 -storepass "$PW" -keypass "$PW" \
+              -dname "CN=IronBody throw-away test key, O=IronBody, C=IN"
+            MODE=selftest
+          fi
+          # fail early, with a clear message, if the key file / alias / password do not fit together
+          keytool -list -keystore "$KEYFILE" -storepass "$PW" -alias ironbody-upload > /dev/null
+          {
+            echo "IRONBODY_UPLOAD_KEYSTORE=$KEYFILE"
+            echo "IRONBODY_UPLOAD_PASSWORD=$PW"
+            echo "IRONBODY_UPLOAD_ALIAS=ironbody-upload"
+          } >> "$GITHUB_ENV"
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+
+      - name: Play bundle - build it
+        id: bundle
+        if: steps.key.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 15
+        working-directory: android
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew bundleRelease --no-daemon --stacktrace 2>&1 | tee "$RUNNER_TEMP/bundle.log"
+
+      # Safety net: the bundle must carry the same web app as the APK and be signed with the upload key
+      # (and not with the public debug key).
+      - name: Play bundle - check it
+        id: verify
+        if: steps.bundle.outcome == 'success'
+        continue-on-error: true
+        shell: bash
+        run: |
+          AAB=android/app/build/outputs/bundle/release/app-release.aab
+          test -s "$AAB"
+          jarsigner -verify "$AAB" > "$RUNNER_TEMP/jarsigner.txt" || true
+          tail -n 3 "$RUNNER_TEMP/jarsigner.txt"
+          grep -q 'jar verified' "$RUNNER_TEMP/jarsigner.txt"
+          fp() { grep 'SHA256:' | head -1 | sed 's/.*SHA256: *//; s/://g' | tr 'A-F' 'a-f'; }
+          GOT=$(keytool -printcert -jarfile "$AAB" | fp)
+          WANT=$(keytool -list -v -keystore "$IRONBODY_UPLOAD_KEYSTORE" -storepass "$IRONBODY_UPLOAD_PASSWORD" -alias ironbody-upload | fp)
+          DEBUG=$(keytool -list -v -keystore keystore/debug.keystore -storepass android | fp)
+          echo "upload key         : $WANT"
+          echo "bundle signed with : $GOT"
+          test -n "$WANT" && test "$WANT" = "$GOT"
+          test "$GOT" != "$DEBUG"
+          unzip -p "$AAB" base/assets/public/index.html | cmp - www/index.html
+          echo "$GOT" > "$RUNNER_TEMP/aab-signer.txt"
+
+      - name: Play bundle - name the file
+        if: steps.verify.outcome == 'success' && steps.key.outputs.mode == 'real'
+        continue-on-error: true
+        run: cp android/app/build/outputs/bundle/release/app-release.aab IronBody-play.aab
+
+      # A short plain-text report, attached to the release: what was built and whether the bundle worked.
+      - name: Write the build report
+        if: always()
+        continue-on-error: true
+        shell: bash
+        env:
+          HAVE_SECRETS: ${{ steps.upload_key.outputs.have }}
+          KEY_OUTCOME: ${{ steps.key.outcome }}
+          KEY_MODE: ${{ steps.key.outputs.mode }}
+          BUNDLE_OUTCOME: ${{ steps.bundle.outcome }}
+          VERIFY_OUTCOME: ${{ steps.verify.outcome }}
+        run: |
+          AAPT2=$(ls "${ANDROID_HOME:-/usr/local/lib/android/sdk}"/build-tools/*/aapt2 | sort -V | tail -1)
+          {
+            echo "IronBody build ${{ github.run_number }}   $(date -u +'%Y-%m-%d %H:%M UTC')"
+            echo "commit ${{ github.sha }}"
+            echo
+            echo "APK"
+            if [ -f IronBody.apk ]; then
+              "$AAPT2" dump badging IronBody.apk | grep -E "^(package|sdkVersion|targetSdkVersion):" || true
+              echo "  size   : $(stat -c %s IronBody.apk) bytes"
+              echo "  sha256 : $(sha256sum IronBody.apk | cut -d' ' -f1)"
+            else
+              echo "  (no APK)"
+            fi
+            echo
+            echo "GOOGLE PLAY BUNDLE"
+            echo "  upload key secrets added : ${HAVE_SECRETS:-unknown}"
+            echo "  signing key step         : ${KEY_OUTCOME:-skipped} (${KEY_MODE:-none})"
+            echo "  bundle build             : ${BUNDLE_OUTCOME:-skipped}"
+            echo "  bundle check             : ${VERIFY_OUTCOME:-skipped}"
+            if [ -s "$RUNNER_TEMP/aab-signer.txt" ]; then echo "  bundle signed with key   : $(cat "$RUNNER_TEMP/aab-signer.txt")  (SHA-256)"; fi
+            if [ -f IronBody-play.aab ]; then
+              echo "  IronBody-play.aab        : $(stat -c %s IronBody-play.aab) bytes - attached to this release, upload it in Play Console"
+            elif [ "$VERIFY_OUTCOME" = "success" ]; then
+              echo "  Build and check worked with a throw-away key. To get a bundle for Google Play, add the two secrets and run this workflow again."
+            fi
+            if [ "$KEY_OUTCOME" = "failure" ]; then echo; echo "The upload key could not be used: check the two secrets (key file as base64 text, password)."; fi
+            if [ "$BUNDLE_OUTCOME" = "failure" ] && [ -f "$RUNNER_TEMP/bundle.log" ]; then echo; echo "--- end of the bundle build log ---"; tail -n 60 "$RUNNER_TEMP/bundle.log"; fi
+            if [ "$VERIFY_OUTCOME" = "failure" ] && [ -f "$RUNNER_TEMP/jarsigner.txt" ]; then echo; echo "--- jarsigner ---"; tail -n 8 "$RUNNER_TEMP/jarsigner.txt"; fi
+          } > build-report.txt
+          { echo '```'; cat build-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      # Puts IronBody.apk (and, once the upload key is set up, IronBody-play.aab) on the Releases page.
       # The link  https://github.com/<you>/<repo>/releases/latest/download/IronBody.apk
       # always points to the newest build.
       - name: Publish on the Releases page
@@ -89,5 +218,10 @@ jobs:
           body: |
             Download **IronBody.apk** below and open it on your Android phone.
             (First time only: Android asks to allow installs from this source - say yes.)
-          files: IronBody.apk
+
+            Also here: **build-report.txt** (what was built) and, once the Google Play upload key is set up, **IronBody-play.aab** (the file for Google Play).
+          files: |
+            IronBody.apk
+            build-report.txt
+            IronBody-play.aab
           make_latest: true
