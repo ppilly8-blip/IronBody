@@ -10,7 +10,7 @@ IronBody: Home Workouts
 **Short description** (80/80)
 No-equipment home workouts with hands-free timers. Bodyweight, HIIT, core, yoga.
 
-**Full description** (1585/4000)
+**Full description** (1584/4000)
 
 IronBody turns your phone into a workout coach that needs no equipment, no account and no internet.
 

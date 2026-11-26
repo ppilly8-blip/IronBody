@@ -105,6 +105,7 @@ jobs:
           if [ "$HAVE" = "true" ]; then
             # tolerate line breaks / spaces that sneak in when the text is pasted into the secret
             printf '%s' "$KS" | tr -d ' \r\n\t' | base64 -d > "$KEYFILE"
+            PW=$(printf '%s' "$PW" | tr -d '\r\n')   # a line break after the password is not part of it
             MODE=real
           else
             PW=$(openssl rand -hex 16)
